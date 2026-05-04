@@ -48,7 +48,9 @@ from tp_mcp.tools.settings import (
 from tp_mcp.tools.strength import (
     tp_create_strength_workout,
     tp_delete_strength_workout,
+    tp_get_strength_history,
     tp_get_strength_workout,
+    tp_list_strength_workouts,
     tp_search_exercise,
     tp_update_strength_workout,
 )
@@ -125,7 +127,9 @@ __all__ = [
     "tp_search_exercise",
     "tp_create_strength_workout",
     "tp_delete_strength_workout",
+    "tp_get_strength_history",
     "tp_get_strength_workout",
+    "tp_list_strength_workouts",
     "tp_update_strength_workout",
     "tp_unpair_workout",
     "tp_update_equipment",

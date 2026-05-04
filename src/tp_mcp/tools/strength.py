@@ -141,6 +141,225 @@ async def tp_get_strength_workout(workout_id: str | int) -> dict[str, Any]:
     return {"success": True, "workout": _unwrap(r.data)}
 
 
+async def tp_list_strength_workouts(
+    start_date: str,
+    end_date: str,
+) -> dict[str, Any]:
+    """List structured strength workouts in a date range.
+
+    Returns lightweight summary entries (id, date, title, compliancePercent,
+    rpe, feel, sequenceSummary). For per-set weight history, follow up with
+    `tp_get_strength_workout(workout_id)` on each completed workout, or use
+    `tp_get_strength_history` which aggregates that for you.
+
+    Args:
+        start_date: 'YYYY-MM-DD' (inclusive).
+        end_date: 'YYYY-MM-DD' (inclusive).
+
+    Returns dict with success and `workouts` list.
+    """
+    async with StrengthClient() as c:
+        athlete_id = await c._tp_client.ensure_athlete_id()
+        r = await c.get(f"workouts/calendar/{athlete_id}/{start_date}/{end_date}")
+    if not r.success:
+        return {
+            "success": False,
+            "error_code": r.error_code.name if r.error_code else "API_ERROR",
+            "message": r.message,
+        }
+    items = _unwrap(r.data) or []
+    summaries = []
+    for w in items if isinstance(items, list) else []:
+        summaries.append(
+            {
+                "id": w.get("id"),
+                "title": w.get("title"),
+                "prescribedDate": w.get("prescribedDate"),
+                "prescribedStartTime": w.get("prescribedStartTime"),
+                "compliancePercent": w.get("compliancePercent"),
+                "rpe": w.get("rpe"),
+                "feel": w.get("feel"),
+                "completedDateTime": w.get("completedDateTime"),
+                "executedDurationInSeconds": w.get("executedDurationInSeconds"),
+                "sequenceSummary": [
+                    {"order": s.get("sequenceOrder"), "title": s.get("title")}
+                    for s in (w.get("sequenceSummary") or [])
+                ],
+            }
+        )
+    return {
+        "success": True,
+        "count": len(summaries),
+        "start_date": start_date,
+        "end_date": end_date,
+        "workouts": summaries,
+    }
+
+
+def _extract_set_history(prescription: dict[str, Any]) -> list[dict[str, Any]]:
+    """Pull executed reps/weight/duration from each set of a prescription."""
+    out = []
+    for s in prescription.get("sets") or []:
+        if not s.get("isComplete"):
+            continue
+        values = {}
+        for pv in s.get("parameterValues") or []:
+            param = pv.get("parameter")
+            executed = pv.get("executedValue")
+            prescribed = pv.get("prescribedValue")
+            if executed is None and prescribed is None:
+                continue
+            try:
+                executed_num = float(executed) if executed is not None else None
+            except (TypeError, ValueError):
+                executed_num = None
+            try:
+                prescribed_num = float(prescribed) if prescribed is not None else None
+            except (TypeError, ValueError):
+                prescribed_num = None
+            values[param] = {"executed": executed_num, "prescribed": prescribed_num}
+        if values:
+            out.append(values)
+    return out
+
+
+async def tp_get_strength_history(
+    exercise_name: str | None = None,
+    days_back: int = 30,
+    end_date: str | None = None,
+) -> dict[str, Any]:
+    """Aggregate per-exercise load history across recent strength workouts.
+
+    Pulls the strength calendar for the date range, fetches each completed
+    workout, walks every block/prescription/set, and returns per-exercise
+    history with executed weight, reps, and the workout's RPE.
+
+    Use this in the Sunday Routine to compute progressive overload targets
+    for the upcoming week.
+
+    Args:
+        exercise_name: Filter by exact title match (case-insensitive). Omit
+            to return history for all exercises.
+        days_back: How far back from `end_date` (or today) to scan.
+        end_date: 'YYYY-MM-DD' end of the window (inclusive). Defaults to today.
+
+    Returns dict with `history` keyed by exercise title:
+        {
+          "Back Squat": [
+            {
+              "date": "2026-05-04",
+              "workout_id": "19542962",
+              "workout_title": "Lower #1 (Squat focus)",
+              "rpe": 3,
+              "feel": 5,
+              "sets": [
+                {"reps": 6, "weight_lb": 185},
+                ...
+              ],
+              "max_weight_lb": 205,
+              "max_weight_reps": 6,
+              "max_weight_set_count": 2
+            },
+            ...
+          ]
+        }
+    Sorted most-recent first per exercise.
+    """
+    end = (
+        date_type.fromisoformat(end_date)
+        if end_date
+        else date_type.today()
+    )
+    start = end - __import__("datetime").timedelta(days=int(days_back))
+
+    listing = await tp_list_strength_workouts(start.isoformat(), end.isoformat())
+    if not listing.get("success"):
+        return listing
+    summaries = listing.get("workouts") or []
+
+    target = exercise_name.strip().lower() if exercise_name else None
+    history: dict[str, list[dict[str, Any]]] = {}
+
+    for sw in summaries:
+        if not sw.get("compliancePercent") or sw["compliancePercent"] <= 0:
+            continue
+        wid = sw.get("id")
+        if not wid:
+            continue
+        full = await tp_get_strength_workout(wid)
+        if not full.get("success"):
+            continue
+        w = full["workout"]
+        for block in w.get("blocks") or []:
+            for p in block.get("prescriptions") or []:
+                ex_title = (p.get("exercise") or {}).get("title") or ""
+                if target and ex_title.lower() != target:
+                    continue
+                set_values = _extract_set_history(p)
+                if not set_values:
+                    continue
+                # Distill per-set rep + weight into a flat shape.
+                flat_sets = []
+                for sv in set_values:
+                    entry: dict[str, Any] = {}
+                    if "Reps" in sv:
+                        entry["reps"] = sv["Reps"]["executed"] or sv["Reps"]["prescribed"]
+                    if "RepsPerSide" in sv:
+                        entry["reps_per_side"] = (
+                            sv["RepsPerSide"]["executed"]
+                            or sv["RepsPerSide"]["prescribed"]
+                        )
+                    if "WeightLb" in sv:
+                        entry["weight_lb"] = sv["WeightLb"]["executed"]
+                    if "WeightPerSideLb" in sv:
+                        entry["weight_per_side_lb"] = sv["WeightPerSideLb"]["executed"]
+                    if "Duration" in sv:
+                        entry["duration_seconds"] = (
+                            sv["Duration"]["executed"] or sv["Duration"]["prescribed"]
+                        )
+                    flat_sets.append(entry)
+                # Compute the heaviest weight set.
+                weights = [
+                    s.get("weight_lb")
+                    for s in flat_sets
+                    if isinstance(s.get("weight_lb"), (int, float))
+                ]
+                max_weight = max(weights) if weights else None
+                max_weight_reps = None
+                max_weight_set_count = 0
+                if max_weight is not None:
+                    matching = [s for s in flat_sets if s.get("weight_lb") == max_weight]
+                    max_weight_set_count = len(matching)
+                    if matching and "reps" in matching[0]:
+                        max_weight_reps = matching[0]["reps"]
+                history.setdefault(ex_title, []).append(
+                    {
+                        "date": sw.get("prescribedDate"),
+                        "workout_id": wid,
+                        "workout_title": sw.get("title"),
+                        "rpe": sw.get("rpe"),
+                        "feel": sw.get("feel"),
+                        "sets": flat_sets,
+                        "max_weight_lb": max_weight,
+                        "max_weight_reps": max_weight_reps,
+                        "max_weight_set_count": max_weight_set_count,
+                    }
+                )
+
+    # Sort each exercise's history most-recent first.
+    for ex_title, entries in history.items():
+        entries.sort(key=lambda e: e["date"] or "", reverse=True)
+
+    return {
+        "success": True,
+        "start_date": start.isoformat(),
+        "end_date": end.isoformat(),
+        "exercise_filter": exercise_name,
+        "exercise_count": len(history),
+        "history": history,
+    }
+
+
 async def tp_search_exercise(
     query: str,
     limit: int = 20,

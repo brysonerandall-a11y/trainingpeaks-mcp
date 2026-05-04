@@ -53,6 +53,7 @@ from tp_mcp.tools import (
     tp_get_peaks,
     tp_get_pool_length_settings,
     tp_get_profile,
+    tp_get_strength_history,
     tp_get_strength_workout,
     tp_get_weekly_summary,
     tp_get_workout,
@@ -61,6 +62,7 @@ from tp_mcp.tools import (
     tp_get_workout_types,
     tp_get_workouts,
     tp_list_athletes,
+    tp_list_strength_workouts,
     tp_log_metrics,
     tp_pair_workout,
     tp_refresh_auth,
@@ -1045,6 +1047,58 @@ TOOLS = [
             "required": ["workout_id"],
         },
     ),
+    Tool(
+        name="tp_list_strength_workouts",
+        description=(
+            "List structured strength workouts in a date range. Returns "
+            "lightweight summary entries with id, title, date, "
+            "compliancePercent, rpe, feel, and an ordered sequenceSummary "
+            "of exercise titles. For per-set weight history use "
+            "tp_get_strength_history (which calls this internally) or "
+            "tp_get_strength_workout(workout_id) for a single workout."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "start_date": {"type": "string", "description": "YYYY-MM-DD inclusive"},
+                "end_date": {"type": "string", "description": "YYYY-MM-DD inclusive"},
+            },
+            "required": ["start_date", "end_date"],
+        },
+    ),
+    Tool(
+        name="tp_get_strength_history",
+        description=(
+            "Aggregate per-exercise load history from completed strength "
+            "workouts in a date window. Returns history keyed by exercise "
+            "title with each entry carrying date, workout RPE, all sets "
+            "(reps + weight), and the heaviest weight set. Use this in the "
+            "Sunday Routine to compute progressive overload targets: pull "
+            "history for each main lift, look at last week's max weight + "
+            "RPE, apply the overload rule, write the suggested weight into "
+            "the next prescription's coachNotes."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "exercise_name": {
+                    "type": "string",
+                    "description": "Filter by exact title match (case-insensitive). Omit to return all exercises.",
+                },
+                "days_back": {
+                    "type": "integer",
+                    "default": 30,
+                    "minimum": 1,
+                    "maximum": 365,
+                },
+                "end_date": {
+                    "type": "string",
+                    "description": "YYYY-MM-DD end of window (inclusive). Defaults to today.",
+                },
+            },
+            "required": [],
+        },
+    ),
 ]
 
 # ---------------------------------------------------------------------------
@@ -1421,6 +1475,20 @@ async def _h_update_strength(args):
 @_handler("tp_delete_strength_workout")
 async def _h_delete_strength(args):
     return await tp_delete_strength_workout(workout_id=args["workout_id"])
+
+@_handler("tp_list_strength_workouts")
+async def _h_list_strength(args):
+    return await tp_list_strength_workouts(
+        start_date=args["start_date"], end_date=args["end_date"],
+    )
+
+@_handler("tp_get_strength_history")
+async def _h_strength_history(args):
+    return await tp_get_strength_history(
+        exercise_name=args.get("exercise_name"),
+        days_back=args.get("days_back", 30),
+        end_date=args.get("end_date"),
+    )
 
 
 @server.call_tool()
