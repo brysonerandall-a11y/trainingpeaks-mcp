@@ -1,0 +1,263 @@
+# Build Log
+
+This file is the durable record of why this fork exists and how the structured strength extension was built. If something breaks, or a future Claude session needs to understand the history without re-deriving it, start here.
+
+## What this fork is
+
+`brysonerandall-a11y/trainingpeaks-mcp` is a fork of `JamsusMaximus/trainingpeaks-mcp` extended with five new MCP tools that target TrainingPeaks's strength builder API. Upstream covers endurance only.
+
+| | |
+|---|---|
+| Local clone | `~/Documents/AI & Projects/mcp-servers/trainingpeaks-mcp/` |
+| Origin remote | `https://github.com/brysonerandall-a11y/trainingpeaks-mcp.git` |
+| Upstream remote | `https://github.com/JamsusMaximus/trainingpeaks-mcp.git` |
+| Branch | `main` |
+| Registered in | `~/.claude.json` under `mcpServers.trainingpeaks` |
+| Auth | OAuth bearer token, exchanged from a TrainingPeaks session cookie stored in macOS Keychain |
+| Powers | `hybrid-lift-programmer` Routine (Sunday 6 PM Central) and `hybrid-lift-reprogrammer` Routine (ad-hoc) |
+
+## Why we extended it
+
+The hybrid-lift Routine originally wrote text descriptions into the workout body of `sport=Strength` workouts, because the existing MCP only spoke the `tpapi.trainingpeaks.com/fitness/v6/` API. That gave Bryce the prescription but no native weight logging.
+
+Reverse-engineering the TP web UI revealed the strength builder lives on a completely separate domain: `api.peakswaresb.com/rx/activity/v1/`. The same OAuth bearer token works on both. Once that was clear, the path forward was an extension, not a workaround.
+
+End state achieved 2026-05-03: the Routine writes structured workouts directly into TP, Bryce logs actual weights set-by-set on his phone during the workout, and the data is queryable for trend analysis.
+
+## The five new tools
+
+| Tool | Purpose |
+|---|---|
+| `tp_get_strength_workout(workout_id)` | Read a structured strength workout by id |
+| `tp_search_exercise(query, limit)` | Search TP's 955-exercise library by name fragment |
+| `tp_create_strength_workout(date, title, blocks, instructions, duration_minutes, tss_planned)` | Create a structured strength workout with native weight logging |
+| `tp_update_strength_workout(workout_id, ...)` | Partial update of an existing structured workout |
+| `tp_delete_strength_workout(workout_id)` | Delete a structured workout |
+
+Total tool count after extension: 63 (was 58 in upstream).
+
+## How a workout payload is shaped
+
+The simplified Python dict format the LLM produces:
+
+```python
+tp_create_strength_workout(
+    date="2026-05-04T06:00:00",
+    title="Lower #1 (Squat focus)",
+    instructions="Heavy squat day. If Whoop is red the night before, swap for 20 min mobility.",
+    duration_minutes=50,
+    tss_planned=40,
+    blocks=[
+        {
+            "title": "Back Squat",
+            "blockType": "SingleExercise",
+            "exercises": [
+                {"name": "Back Squat", "sets": [{"reps": 6}, {"reps": 6}, {"reps": 6}, {"reps": 6}]},
+            ],
+        },
+        {
+            "title": "Walking Lunge + Leg Raise",
+            "blockType": "Superset",
+            "exercises": [
+                {"name": "DB Walking Lunge", "sets": [{"reps": 10}, {"reps": 10}, {"reps": 10}]},
+                {"name": "Hanging Leg Raise", "sets": [{"reps": 12}, {"reps": 12}, {"reps": 12}]},
+            ],
+        },
+        {
+            "title": "Plank Finisher",
+            "blockType": "SingleExercise",
+            "exercises": [
+                {"name": "Plank", "sets": [{"duration_seconds": 45}, {"duration_seconds": 45}, {"duration_seconds": 45}]},
+            ],
+        },
+    ],
+)
+```
+
+Block types: `SingleExercise`, `Superset`, `Circuit`, `WarmUp`, `CoolDown`.
+
+Set parameters accepted: `reps`, `reps_per_side`, `weight_lb`, `weight_kg`, `weight_per_side_lb`, `weight_per_side_kg`, `duration_seconds`, `distance_meters`, `distance_miles`. Always leave weight columns blank — the athlete fills those in on the phone during the session.
+
+## Critical constraints baked into the code
+
+These are the gotchas that took multiple debug iterations to find. If you hit a 400 from TP, check this list first.
+
+| Gotcha | Why it matters | Where it is handled |
+|---|---|---|
+| `workoutType` must be `"StructuredStrength"`, not `"Strength"` | TP rejects "Strength" silently with 400 "Invalid workout" | Hardcoded in `tp_create_strength_workout` |
+| `calendarId` equals the athlete's id | Required, no default | Pulled via `TPClient.ensure_athlete_id()` |
+| `prescribedStartTime` is time-only `HH:MM:SS`, never a full ISO datetime | Sending `2026-05-04T06:00:00` to that field returns 400 | `_normalize_date` strips date portion |
+| Per-exercise time parameter is `Duration` (in seconds), NOT `TimeSeconds` | `TimeSeconds` is block-level only; using it on a prescription returns 400 | `_PARAM_CATALOG` and `_infer_parameters_for_exercise` |
+| API responses are wrapped in `{"data": ..., "errors": {}}` | Unwrap before reading workout fields | `_unwrap` helper |
+| Create flow is three steps, not one | POST `/workouts` returns a UUID-id draft, PUT `/workouts` populates blocks, POST `/workouts/save` commits to a persistent integer id | Implemented inside `tp_create_strength_workout` |
+| Supersets need parameter compatibility | All exercises in a Superset must share parameter types (all reps-based, OR all duration-based, never mixed) | Documented in tool description; LLM has to honor this |
+| Plank in a Superset with reps exercises will 400 | Same root cause as above | Plank goes in its own SingleExercise block |
+| TP exercise names must match the library | Free-form names produce a closest-match silently | Use `tp_search_exercise` first to confirm the exact title |
+
+## Common Bryce movements with their TP exercise IDs
+
+Confirmed via `tp_search_exercise` during build. Use these to cross-check on future builds.
+
+| Movement | TP id | Notes |
+|---|---|---|
+| Back Squat | 131 | Quad-dominant primary |
+| Front Squat | 143 | Trunk-honest accessory |
+| Paused Back Squat | 5356 | Variation |
+| Deadlift | 141 | "Conventional Deadlift" maps here |
+| Romanian Deadlift | 154 | |
+| Single Leg Romanian Deadlift | 156 | Search "Single-Leg RDL" hits this too |
+| TrapBar Deadlift | 903 | |
+| DB Walking Lunge | 47 | Beware: bare "Walking Lunge" returns id 924 (overhead) |
+| Bench Press | 16 | |
+| DB Bench Press | 30 | Use this for "Flat DB Press" intent |
+| Incline DB Press | 611 | |
+| Barbell Overhead Press | 11 | |
+| Seated DB Press | 771 | |
+| Weighted Pull Up | 930 | |
+| Pull Up | 73 | Bodyweight |
+| Bent Over Barbell Row | 134 | |
+| Chest Supported Row | 422793 | |
+| Face Pulls | 422794 | |
+| Cable Lateral Raise | 470 | |
+| DB Lateral Raise | 37 | |
+| Cable Triceps Pushdown | 474 | |
+| Cable Overhead Triceps Extension | 471 | "Overhead Cable Triceps Extension" maps here |
+| Close Grip Incline Bench Press | 486 | "Close Grip Bench Press" maps here |
+| Barbell Bicep Curl | 9 | Bare "Barbell Curl" returns 737 (Reverse) |
+| EZ Bar Curl | 564 | |
+| DB Hammer Curls | 428966 | |
+| Cross Body Hammer Curl | 492 | |
+| Cable Hammer Curl | 467 | |
+| DB Fly | 34 | "DB Chest Fly" maps here |
+| Plank | 71 | Duration parameter, not Reps |
+| Hanging Leg Raise | 590 | |
+| Cable Crunch | 464 | |
+| Rocking Standing Calf Raise | 750 | "Standing Calf Raise" maps here |
+| Swiss Ball Leg Curl | 897 | "Lying Leg Curl" not in library; this is the closest |
+
+Movements NOT in the library (substitute with above): Pallof Press, Lying Leg Curl (literal), Donkey Calf Raise, Pec Deck.
+
+## Programming spec snapshot
+
+The full canonical spec lives in `~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md`. Headlines:
+
+- Six lift days per week, Thursday off (scheduling constraint, not optional).
+- Standard split: Mon Lower #1 (Squat), Tue Upper #1 (Heavy Push), Wed Upper #2 (Heavy Pull), Fri Upper #3 (Hypertrophy), Sat Arms+Calves+Core (light, before long ride), Sun Lower #2 (Hinge).
+- Time targets: Mon/Sun 50 min @ 40 TSS, Tue/Wed/Fri 45 min @ 30-35 TSS, Sat 35 min @ 15 TSS.
+- Main lifts get full rest (90 sec to 3:00). Accessories paired into supersets to cut idle time.
+- 2-3 core movements every session, slotted into back-half supersets so they do not bloat session time.
+- Movement variation week-to-week within the same pattern.
+- Race-phase modulation: 5+ weeks out full program, 2-3 weeks out drop Sat lift, race week and post-race deload have no strength.
+- Weight columns always blank in the prescription; Bryce logs actual loads on his phone during the session.
+
+## Operational details
+
+### How a future session loads context
+
+Open this file. Then check:
+
+1. `notes-strength-api/SCHEMA.md` for full API reference.
+2. `notes-strength-api/README.md` for the captures folder explanation.
+3. `~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md` for the programming spec.
+4. `git log -- src/tp_mcp/tools/strength.py src/tp_mcp/client/strength_http.py` for change history.
+
+### How to invoke the new tools
+
+Three paths:
+
+1. **Native MCP tools after Claude Code restart:** `mcp__trainingpeaks__tp_create_strength_workout`, `mcp__trainingpeaks__tp_search_exercise`, etc. Available once Claude Code spawns a fresh tp-mcp server.
+2. **Python wrapper from any session:**
+   ```bash
+   "/Users/randall/Documents/AI & Projects/mcp-servers/trainingpeaks-mcp/.venv/bin/python" - <<'PY'
+   import asyncio
+   from tp_mcp.tools.strength import tp_create_strength_workout
+   asyncio.run(tp_create_strength_workout(...))
+   PY
+   ```
+3. **Inside the Sunday Routine:** the Routine body lists the tool calls in its Steps to Execute. The Routine fires Sunday 6 PM Central from a fresh Claude Code session and picks up whatever the MCP server exposes.
+
+### How to apply code changes
+
+The package is installed as a regular (non-editable) install, NOT editable. Reason: macOS Python's `.pth` file processing did not honor a path containing spaces and `&` characters, so the editable install pointed at `src/` was silently ignored at import time. Symptom was the MCP server failing to start with `ModuleNotFoundError: No module named 'tp_mcp'`.
+
+Workflow when you change code in `src/`:
+
+```bash
+cd "/Users/randall/Documents/AI & Projects/mcp-servers/trainingpeaks-mcp"
+./.venv/bin/pip install ".[browser]" 2>&1 | tail -5
+./.venv/bin/tp-mcp auth-status   # smoke test
+```
+
+Then quit Claude Code and relaunch so it spawns a fresh MCP server with your new code.
+
+### How to refresh authentication
+
+The TP cookie lasts roughly two weeks. When it expires:
+
+```bash
+"/Users/randall/Documents/AI & Projects/mcp-servers/trainingpeaks-mcp/.venv/bin/tp-mcp" auth --from-browser chrome
+```
+
+May trigger macOS Keychain or Full Disk Access prompts. Approve them. Cookie gets exchanged for a fresh OAuth token and stored in the system keyring.
+
+### How to refresh the captures (if TP changes their API)
+
+See `notes-strength-api/README.md` for the script. Re-run captures, diff against the saved files, update `_PARAM_CATALOG` or schema if needed.
+
+## Session-by-session history
+
+### Session 1 (2026-04-27, Mon evening)
+
+Installed upstream `JamsusMaximus/trainingpeaks-mcp`. Authenticated via Chrome cookie auto-extract. Registered in `~/.claude.json`. Verified via `tp_auth_status` and `tp_get_workouts`. First manual hybrid-lift programming pass for week of 4/27-5/3 using text descriptions (3 sessions: Tue Upper Push, Fri Upper Pull, Sun Lower combined). Memory file `hybrid_lifting_program.md` created with the lifter profile and constraints.
+
+### Session 2 (2026-04-27, late evening)
+
+Refined the programming to a six-day split (Mon-Tue-Wed-Fri-Sat-Sun). Updated this week's plan to add Wed Heavy Pull and Sat Arms+Calves+Core, repurposed Friday from Pull to Hypertrophy. Built two Routines via the build-routine skill: `hybrid-lift-programmer` (Sunday 6 PM Central recurring) and `hybrid-lift-reprogrammer` (ad-hoc, manual trigger when Natasha changes the endurance plan). Test-fired the recurring Routine with an HTML email summary. Added supersets and a 2-3 core movement rule per session.
+
+### Session 3 (2026-04-28)
+
+Mid-week, Natasha updated her endurance plan: removed Friday's run, added Sunday aerobic run, moved Train Heroic strength placeholder to Wednesday. Ran the reprogrammer logic inline: deleted the Wed Heavy Pull (would double-stack with Train Heroic), trimmed Sunday Lower volume to account for the new Sunday run. Then captured TP's strength builder API via Chrome MCP network sniffing, parsed the schema, and wrote `notes-strength-api/SCHEMA.md` as the build reference.
+
+### Session 4 (2026-05-03, evening)
+
+Built the strength MCP extension. New file `tp_mcp/client/strength_http.py` (`StrengthClient` reusing `TPClient` token cache, targeting `api.peakswaresb.com`). New file `tp_mcp/tools/strength.py` (the five tools, builder helpers, library cache). Registered in `tp_mcp/tools/__init__.py` and `tp_mcp/server.py`. Round-trip test passed (create -> read -> update -> delete a fake workout). Migrated next week's 6 lifts from text descriptions to structured workouts (135 prescribed sets, all with empty weight columns). Updated both Routines to call the new tools instead of text-format. Updated memory file with the new programming format.
+
+### Session 5 (2026-05-03, late evening)
+
+GitHub fork created at `brysonerandall-a11y/trainingpeaks-mcp`. Renamed previous `origin` to `upstream`, added the fork as new `origin`. Committed and pushed our changes (12 files, 1562 insertions, commit `0327563`). Updated `skill-audit.md` with the new MCP entry. Discovered the editable install was silently broken (path with spaces and `&`); reinstalled as a regular non-editable package. Wrote this build log.
+
+## Known issues and gotchas
+
+1. **Editable installs are broken on this filesystem.** The `.pth` mechanism does not honor the `~/Documents/AI & Projects/mcp-servers/trainingpeaks-mcp/src` path. Stay on regular installs (`pip install .`).
+
+2. **Native MCP tools require a Claude Code quit-and-relaunch after any code change.** A `/clear` or in-session reset does not respawn the MCP server.
+
+3. **TP cookie expires every ~2 weeks.** Bryce will need to re-run `tp-mcp auth --from-browser chrome` periodically. Both Routines detect auth failure and send a `[ACTION REQUIRED]` email instead of writing workouts.
+
+4. **Some movements are not in the TP library.** Pallof Press, literal Lying Leg Curl, Donkey Calf Raise. Substitute with closest matches (see exercise table above) or fall back to instructions text for those movements.
+
+5. **TP exercise library matches are scored by title fuzziness.** Bare "Barbell Curl" returns "Reverse Barbell Curl" because of how the scoring breaks ties. Use precise names ("Barbell Bicep Curl", id 9) to avoid surprises.
+
+6. **The Sunday Routine fires from a fresh Claude Code session.** Whatever code is installed at that moment is what runs. After any code change, reinstall + relaunch before the next Sunday at 6 PM.
+
+## Quick reference: re-running the migration
+
+If the structured workouts get out of sync with the spec, the path to rebuild a week from scratch:
+
+```python
+import asyncio
+from tp_mcp.tools.workouts import tp_get_workouts, tp_delete_workout
+from tp_mcp.tools.strength import tp_delete_strength_workout, tp_create_strength_workout
+
+async def main():
+    # 1. Find existing strength sessions
+    plan = await tp_get_workouts(start_date="YYYY-MM-DD", end_date="YYYY-MM-DD", workout_filter="planned")
+    # filter for sport=Strength and titles starting with "Upper", "Lower", "Arms +"
+    # 2. Delete via tp_delete_workout (text-format) or tp_delete_strength_workout (structured)
+    # 3. Build new sessions per the spec
+    # 4. Write via tp_create_strength_workout
+
+asyncio.run(main())
+```
+
+The full migration script that ran in Session 4 is in the conversation transcript and can be regenerated from the programming spec.
