@@ -26,12 +26,14 @@ from tp_mcp.tools import (
     tp_create_library,
     tp_create_library_item,
     tp_create_note,
+    tp_create_strength_workout,
     tp_create_workout,
     tp_delete_availability,
     tp_delete_equipment,
     tp_delete_event,
     tp_delete_library,
     tp_delete_note,
+    tp_delete_strength_workout,
     tp_delete_workout,
     tp_delete_workout_file,
     tp_download_workout_file,
@@ -51,6 +53,7 @@ from tp_mcp.tools import (
     tp_get_peaks,
     tp_get_pool_length_settings,
     tp_get_profile,
+    tp_get_strength_workout,
     tp_get_weekly_summary,
     tp_get_workout,
     tp_get_workout_comments,
@@ -63,6 +66,7 @@ from tp_mcp.tools import (
     tp_refresh_auth,
     tp_reorder_workouts,
     tp_schedule_library_workout,
+    tp_search_exercise,
     tp_unpair_workout,
     tp_update_equipment,
     tp_update_event,
@@ -71,6 +75,7 @@ from tp_mcp.tools import (
     tp_update_library_item,
     tp_update_nutrition,
     tp_update_speed_zones,
+    tp_update_strength_workout,
     tp_update_workout,
     tp_upload_workout_file,
     tp_validate_structure,
@@ -898,6 +903,148 @@ TOOLS = [
             "properties": {},
         },
     ),
+    # --- Strength workouts (TP strength builder API) ---
+    Tool(
+        name="tp_get_strength_workout",
+        description=(
+            "Get a structured strength workout by id from TP's strength API. "
+            "Returns the full block/prescription/set structure with exercise "
+            "library references. Different from tp_get_workout, which only "
+            "covers endurance workouts."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "workout_id": {"type": "string", "description": "Strength workout id"},
+            },
+            "required": ["workout_id"],
+        },
+    ),
+    Tool(
+        name="tp_search_exercise",
+        description=(
+            "Search TP's exercise library for movements by name. Returns up "
+            "to 20 matches with exerciseId, title, and primary muscle groups. "
+            "Use before tp_create_strength_workout to confirm exercise names "
+            "are valid TP library entries."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search term, e.g. 'back squat'"},
+                "limit": {"type": "integer", "default": 20, "minimum": 1, "maximum": 50},
+            },
+            "required": ["query"],
+        },
+    ),
+    Tool(
+        name="tp_create_strength_workout",
+        description=(
+            "Create a structured strength workout in TP with native sets, reps, "
+            "and weight columns the athlete logs against on their phone during "
+            "the workout. Each block is one of: SingleExercise, Superset, "
+            "Circuit, WarmUp, CoolDown. Each exercise references TP's library "
+            "by name (or exerciseId). Each set carries prescribedValue for "
+            "reps/weight/duration; executedValue is filled in during the "
+            "workout. Constraint: a Superset must contain exercises with "
+            "compatible parameters (e.g. all reps-based, not reps mixed with "
+            "duration). Use SingleExercise for time-based finishers like "
+            "Plank."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "date": {"type": "string", "description": "YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS (start time used as time-of-day)"},
+                "title": {"type": "string"},
+                "instructions": {"type": "string"},
+                "duration_minutes": {"type": "integer"},
+                "tss_planned": {"type": "number"},
+                "blocks": {
+                    "type": "array",
+                    "description": "Ordered list of blocks. Each block has title, blockType, and exercises[].",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "title": {"type": "string"},
+                            "blockType": {
+                                "type": "string",
+                                "enum": ["SingleExercise", "Superset", "Circuit", "WarmUp", "CoolDown"],
+                            },
+                            "coachNotes": {"type": "string"},
+                            "exercises": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {"type": "string", "description": "Exercise name (resolved from TP library)"},
+                                        "exerciseId": {"description": "Numeric TP exercise id (alternative to name)"},
+                                        "parameters": {
+                                            "type": "array",
+                                            "description": "Override the inferred parameter list. Values: Reps, RepsPerSide, WeightLb, WeightKg, WeightPerSideLb, WeightPerSideKg, Duration, DistanceMeters, DistanceMiles.",
+                                            "items": {"type": "string"},
+                                        },
+                                        "sets": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "reps": {"type": "integer"},
+                                                    "reps_per_side": {"type": "integer"},
+                                                    "weight_lb": {"type": "number"},
+                                                    "weight_kg": {"type": "number"},
+                                                    "weight_per_side_lb": {"type": "number"},
+                                                    "weight_per_side_kg": {"type": "number"},
+                                                    "duration_seconds": {"type": "integer"},
+                                                    "distance_meters": {"type": "number"},
+                                                    "distance_miles": {"type": "number"},
+                                                },
+                                            },
+                                        },
+                                        "coachNotes": {"type": "string"},
+                                    },
+                                    "required": ["sets"],
+                                },
+                            },
+                        },
+                        "required": ["title", "blockType", "exercises"],
+                    },
+                },
+            },
+            "required": ["date", "title", "blocks"],
+        },
+    ),
+    Tool(
+        name="tp_update_strength_workout",
+        description=(
+            "Update an existing structured strength workout. Supply only the "
+            "fields you want to change. To replace the workout structure, "
+            "pass `blocks` (same schema as tp_create_strength_workout)."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "workout_id": {"type": "string"},
+                "title": {"type": "string"},
+                "instructions": {"type": "string"},
+                "duration_minutes": {"type": "integer"},
+                "tss_planned": {"type": "number"},
+                "date": {"type": "string"},
+                "blocks": {"type": "array"},
+            },
+            "required": ["workout_id"],
+        },
+    ),
+    Tool(
+        name="tp_delete_strength_workout",
+        description="Delete a structured strength workout by id.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "workout_id": {"type": "string"},
+            },
+            "required": ["workout_id"],
+        },
+    ),
 ]
 
 # ---------------------------------------------------------------------------
@@ -1243,6 +1390,37 @@ async def _h_schedule_lib(args):
     return await tp_schedule_library_workout(
         library_id=args["library_id"], item_id=args["item_id"], date=args["date"],
     )
+
+# --- Strength workouts (TP strength builder API) ---
+@_handler("tp_get_strength_workout")
+async def _h_get_strength(args):
+    return await tp_get_strength_workout(workout_id=args["workout_id"])
+
+@_handler("tp_search_exercise")
+async def _h_search_exercise(args):
+    return await tp_search_exercise(query=args["query"], limit=args.get("limit", 20))
+
+@_handler("tp_create_strength_workout")
+async def _h_create_strength(args):
+    return await tp_create_strength_workout(
+        date=args["date"], title=args["title"], blocks=args["blocks"],
+        instructions=args.get("instructions"),
+        duration_minutes=args.get("duration_minutes"),
+        tss_planned=args.get("tss_planned"),
+    )
+
+@_handler("tp_update_strength_workout")
+async def _h_update_strength(args):
+    return await tp_update_strength_workout(
+        workout_id=args["workout_id"], title=args.get("title"),
+        instructions=args.get("instructions"), blocks=args.get("blocks"),
+        duration_minutes=args.get("duration_minutes"),
+        tss_planned=args.get("tss_planned"), date=args.get("date"),
+    )
+
+@_handler("tp_delete_strength_workout")
+async def _h_delete_strength(args):
+    return await tp_delete_strength_workout(workout_id=args["workout_id"])
 
 
 @server.call_tool()
