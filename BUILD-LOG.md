@@ -108,10 +108,10 @@ Confirmed via `tp_search_exercise` during build. Use these to cross-check on fut
 | Single Leg Romanian Deadlift | 156 | Search "Single-Leg RDL" hits this too |
 | TrapBar Deadlift | 903 | |
 | DB Walking Lunge | 47 | Beware: bare "Walking Lunge" returns id 924 (overhead) |
-| Bench Press | 16 | |
-| DB Bench Press | 30 | Use this for "Flat DB Press" intent |
-| Incline DB Press | 611 | |
-| Barbell Overhead Press | 11 | |
+| Bench Press | 16 | **BANNED** (barbell flat bench) — see `docs/programming-spec.md` §2. Substitute: DB Bench Press (30) or machine/cable chest press. |
+| DB Bench Press | 30 | Use this for "Flat DB Press" intent. Default substitute for Bench Press (16). |
+| Incline DB Press | 611 | Default for incline pressing. Barbell incline is BANNED — see programming-spec.md §2. |
+| Barbell Overhead Press | 11 | The ONLY allowed barbell pressing pattern. |
 | Seated DB Press | 771 | |
 | Weighted Pull Up | 930 | |
 | Pull Up | 73 | Bodyweight |
@@ -122,7 +122,7 @@ Confirmed via `tp_search_exercise` during build. Use these to cross-check on fut
 | DB Lateral Raise | 37 | |
 | Cable Triceps Pushdown | 474 | |
 | Cable Overhead Triceps Extension | 471 | "Overhead Cable Triceps Extension" maps here |
-| Close Grip Incline Bench Press | 486 | "Close Grip Bench Press" maps here |
+| Close Grip Incline Bench Press | 486 | **BANNED** (barbell close-grip bench/incline) — see `docs/programming-spec.md` §2. Substitute: Cable Triceps Pushdown (474), Cable Overhead Triceps Extension (471), DB Skullcrusher, or Dip Machine. |
 | Barbell Bicep Curl | 9 | Bare "Barbell Curl" returns 737 (Reverse) |
 | EZ Bar Curl | 564 | |
 | DB Hammer Curls | 428966 | |
@@ -139,7 +139,9 @@ Movements NOT in the library (substitute with above): Pallof Press, Lying Leg Cu
 
 ## Programming spec snapshot
 
-The full canonical spec lives in `~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md`. Headlines:
+The in-repo canonical programming spec is `docs/programming-spec.md`. Read it first for periodization rules, the elbow-safe pressing constraint, equipment baseline, and the alternatives convention. The personal/lifter-profile spec (off-repo) lives in `~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md`. On conflict, `docs/programming-spec.md` wins.
+
+Headlines:
 
 - Six lift days per week, Thursday off (scheduling constraint, not optional).
 - Standard split: Mon Lower #1 (Squat), Tue Upper #1 (Heavy Push), Wed Upper #2 (Heavy Pull), Fri Upper #3 (Hypertrophy), Sat Arms+Calves+Core (light, before long ride), Sun Lower #2 (Hinge).
@@ -147,6 +149,9 @@ The full canonical spec lives in `~/.claude/projects/-Users-randall-Documents-AI
 - Main lifts get full rest (90 sec to 3:00). Accessories paired into supersets to cut idle time.
 - 2-3 core movements every session, slotted into back-half supersets so they do not bloat session time.
 - Movement variation week-to-week within the same pattern.
+- **Periodization (see programming-spec.md §1):** default 4-week mesocycle = 3 loading weeks + 1 deload (~60% volume, intensity held). Linear for strength blocks, DUP for mixed/general phases, Block for race builds (≤12 weeks out). Each loading week shows a single explicit progression rule (`+load`, `+reps`, `+sets`, or `+density`), recorded in the workout `instructions` field as `Progression: <rule> (W<n> of 4)` so a future session can read it back.
+- **Pressing constraint (see programming-spec.md §2, HARD RULE):** barbell pressing is overhead press only. All horizontal/incline pressing must be DB, machine, or cable. Reason: mild elbow tendonosis flares with barbell bench/incline. Banned ids include Bench Press (16) and Close Grip Incline Bench Press (486); substitutes are flagged in the movements table above.
+- **Equipment & alternatives (see programming-spec.md §3):** default site is Trump Tower Chicago Fitness Club (assume well-equipped commercial gym). Every "main movement" must include 1-2 alternative movements in the `coachNotes` field on the same prescription where rest times go, so there is a fallback if equipment is missing.
 - Race-phase modulation: 5+ weeks out full program, 2-3 weeks out drop Sat lift, race week and post-race deload have no strength.
 - Weight columns always blank in the prescription; Bryce logs actual loads on his phone during the session.
 
@@ -225,6 +230,10 @@ Built the strength MCP extension. New file `tp_mcp/client/strength_http.py` (`St
 ### Session 5 (2026-05-03, late evening)
 
 GitHub fork created at `brysonerandall-a11y/trainingpeaks-mcp`. Renamed previous `origin` to `upstream`, added the fork as new `origin`. Committed and pushed our changes (12 files, 1562 insertions, commit `0327563`). Updated `skill-audit.md` with the new MCP entry. Discovered the editable install was silently broken (path with spaces and `&`); reinstalled as a regular non-editable package. Wrote this build log.
+
+### Session 6 (2026-05-09)
+
+Created in-repo programming spec at `docs/programming-spec.md` covering: 4-week mesocycle (3 loading + 1 deload), model selection (linear / DUP / block), microcycle progression rules (`+load`, `+reps`, `+sets`, `+density`) encoded in the workout `instructions` field, deload semantics (~60% volume, intensity held), the elbow-safe pressing constraint (barbell pressing = overhead press only), Trump Tower Chicago equipment baseline, and the alternatives-in-coachNotes convention for every main movement. Audited existing repo files for banned barbell pressing: `notes-strength-api/workout-19347189.json` was clean (DB/bodyweight only); the BUILD-LOG.md exercise reference table had Bench Press (16) and Close Grip Incline Bench Press (486) listed as available — both flagged BANNED with substitute pointers in place. No active prescription file required a movement swap.
 
 ## Known issues and gotchas
 
