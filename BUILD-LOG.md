@@ -108,13 +108,15 @@ Confirmed via `tp_search_exercise` during build. Use these to cross-check on fut
 | Single Leg Romanian Deadlift | 156 | Search "Single-Leg RDL" hits this too |
 | TrapBar Deadlift | 903 | |
 | DB Walking Lunge | 47 | Beware: bare "Walking Lunge" returns id 924 (overhead) |
-| Bench Press | 16 | **BANNED** (barbell flat bench) — see `docs/programming-spec.md` §2. Substitute: DB Bench Press (30) or machine/cable chest press. |
-| DB Bench Press | 30 | Use this for "Flat DB Press" intent. Default substitute for Bench Press (16). |
-| Incline DB Press | 611 | Default for incline pressing. Barbell incline is BANNED — see programming-spec.md §2. |
+| Bench Press | 16 | **BANNED** (all bench-press patterns) — see `docs/programming-spec.md` §2. Substitute: Machine Chest Press, Cable Chest Press, DB Floor Press (398), Push-up, or Dip. |
+| DB Bench Press | 30 | **BANNED** (athlete avoiding all bench-press patterns 2026-05-13 forward) — see `docs/programming-spec.md` §2. Substitute: Machine Chest Press, Cable Chest Press, DB Floor Press (398), Push-up, or Dip. |
+| Incline DB Press | 611 | **BANNED** (no incline equipment at athlete's setup) — see `docs/programming-spec.md` §2. No direct substitute; drop the slot, or use a low-to-high cable fly / standing landmine press for upper-chest emphasis. |
 | Barbell Overhead Press | 11 | The ONLY allowed barbell pressing pattern. |
+| DB Floor Press | 398 | Default heavy horizontal-press alternate. Confirmed via `tp_search_exercise "Floor Press"`. |
+| Lat Pulldown | (search to confirm) | New default for the vertical-pull heavy slot (replaces Weighted Pull Up 930). |
 | Seated DB Press | 771 | |
-| Weighted Pull Up | 930 | |
-| Pull Up | 73 | Bodyweight |
+| Weighted Pull Up | 930 | **NOT PROGRAMMED** (athlete has no rack/band setup for weighted pull-ups 2026-05-13 forward) — see `docs/programming-spec.md` §3. Default vertical-pull anchor is now Lat Pulldown. Pull Up (73) is allowed for higher-rep finishers only. |
+| Pull Up | 73 | Bodyweight. Use for higher-rep finishers; not the heavy vertical-pull anchor. |
 | Bent Over Barbell Row | 134 | |
 | Chest Supported Row | 422793 | |
 | Face Pulls | 422794 | |
@@ -129,9 +131,17 @@ Confirmed via `tp_search_exercise` during build. Use these to cross-check on fut
 | Cross Body Hammer Curl | 492 | |
 | Cable Hammer Curl | 467 | |
 | DB Fly | 34 | "DB Chest Fly" maps here |
-| Plank | 71 | Duration parameter, not Reps |
-| Hanging Leg Raise | 590 | |
-| Cable Crunch | 464 | |
+| Plank | 71 | Duration parameter, not Reps. Cap at 2× per week (core variety rule, programming-spec.md §5). |
+| Hanging Leg Raise | 590 | Cap at 2× per week (core variety rule, programming-spec.md §5). |
+| Cable Crunch | 464 | Flexion / dynamic pattern. |
+| Side Plank | (search) | Anti-lateral-flexion pattern. |
+| Bird Dog | (search) | Anti-rotation pattern. |
+| Dead Bug | (search) | Anti-extension pattern. |
+| Suitcase Carry | (search) | Anti-lateral-flexion pattern; DB unilateral. |
+| Cable Wood Chop | (search) | Controlled rotation; high-to-low or low-to-high. |
+| Russian Twist | (search) | Controlled rotation; DB or plate. |
+| Pallof Press | (NOT in library) | Anti-rotation; substitute by logging Cable Crunch as the closest entry and putting "Pallof Press" in `coachNotes`. |
+| Ab Wheel Rollout | (search; may not be in library) | Anti-extension; substitute as for Pallof Press if missing. |
 | Rocking Standing Calf Raise | 750 | "Standing Calf Raise" maps here |
 | Swiss Ball Leg Curl | 897 | "Lying Leg Curl" not in library; this is the closest |
 
@@ -150,7 +160,12 @@ Headlines:
 - 2-3 core movements every session, slotted into back-half supersets so they do not bloat session time.
 - Movement variation week-to-week within the same pattern.
 - **Periodization (see programming-spec.md §1):** default 4-week mesocycle = 3 loading weeks + 1 deload (~60% volume, intensity held). Linear for strength blocks, DUP for mixed/general phases, Block for race builds (≤12 weeks out). Each loading week shows a single explicit progression rule (`+load`, `+reps`, `+sets`, or `+density`), recorded in the workout `instructions` field as `Progression: <rule> (W<n> of 4)` so a future session can read it back.
-- **Pressing constraint (see programming-spec.md §2, HARD RULE):** barbell pressing is overhead press only. All horizontal/incline pressing must be DB, machine, or cable. Reason: mild elbow tendonosis flares with barbell bench/incline. Banned ids include Bench Press (16) and Close Grip Incline Bench Press (486); substitutes are flagged in the movements table above.
+- **Pressing constraint (see programming-spec.md §2, HARD RULE — updated 2026-05-13):** barbell pressing is overhead press only. ALL bench-press patterns are banned, including DB Bench Press — horizontal-press default is now Machine Chest Press (alternates: Cable Chest Press, DB Floor Press, push-up, dip). NO incline pressing of any kind (no incline equipment at athlete's setup); drop the slot or substitute a low-to-high cable fly / standing landmine press. Banned ids include Bench Press (16), DB Bench Press (30), Incline DB Press (611), and Close Grip Incline Bench Press (486).
+- **Vertical pull (see programming-spec.md §3 — updated 2026-05-13):** Lat Pulldown is the heavy vertical-pull default. Weighted Pull Up (930) is NOT programmed (no rack/band at athlete's setup). Pull Up (73) is allowed only for higher-rep finishers.
+- **Rest times (see programming-spec.md §4 — NEW 2026-05-13):** every prescription's `coachNotes` field starts with `Rest <X>. Alt: <a>; <b>.` Defaults: main compound 2:30-3:00, secondary 1:30-2:00, accessory in superset 60-75s, core 45-60s, plyo 1:30-2:00. Rest must live on the prescription, not the top-level `instructions`, so the lifter sees it in the phone UI during the set.
+- **Core variety (see programming-spec.md §5 — NEW 2026-05-13):** five patterns — anti-extension, anti-rotation, anti-lateral-flexion, flexion/dynamic, controlled rotation. Hit ≥3 patterns per week, ≥4 distinct movements. Plank and Hanging Leg Raise each cap at 2× per week.
+- **Plyometrics (see programming-spec.md §6 — NEW 2026-05-13):** plyo block goes FIRST after warm-up, before the heavy compound. 2-4 sets × 3-5 reps with 1:30-2:00 rest. Day-specific bias: Mon vertical jumps, Sun horizontal jumps + KB swings, Tue plyo push-up / MB chest pass, Wed MB rotational throws. Skip on Fri (hypertrophy) and Sat (pre-long-ride). Skip during deload.
+- **Cardio intervals (see programming-spec.md §7 — NEW 2026-05-13):** VO2 Max, MAP, and sprint protocols via the WODWAY curved treadmill. 1× VO2 Max OR MAP per week (Wed default) + optionally 1× sprint session (Tue/Fri). Logged as endurance Run workouts via `tp_create_workout`, NOT as strength. Never stack against Natasha's quality run days.
 - **Equipment & alternatives (see programming-spec.md §3):** default site is Trump Tower Chicago Fitness Club (assume well-equipped commercial gym). Every "main movement" must include 1-2 alternative movements in the `coachNotes` field on the same prescription where rest times go, so there is a fallback if equipment is missing.
 - Race-phase modulation: 5+ weeks out full program, 2-3 weeks out drop Sat lift, race week and post-race deload have no strength.
 - Weight columns always blank in the prescription; Bryce logs actual loads on his phone during the session.
@@ -234,6 +249,21 @@ GitHub fork created at `brysonerandall-a11y/trainingpeaks-mcp`. Renamed previous
 ### Session 6 (2026-05-09)
 
 Created in-repo programming spec at `docs/programming-spec.md` covering: 4-week mesocycle (3 loading + 1 deload), model selection (linear / DUP / block), microcycle progression rules (`+load`, `+reps`, `+sets`, `+density`) encoded in the workout `instructions` field, deload semantics (~60% volume, intensity held), the elbow-safe pressing constraint (barbell pressing = overhead press only), Trump Tower Chicago equipment baseline, and the alternatives-in-coachNotes convention for every main movement. Audited existing repo files for banned barbell pressing: `notes-strength-api/workout-19347189.json` was clean (DB/bodyweight only); the BUILD-LOG.md exercise reference table had Bench Press (16) and Close Grip Incline Bench Press (486) listed as available — both flagged BANNED with substitute pointers in place. No active prescription file required a movement swap.
+
+### Session 7 (2026-05-13)
+
+Athlete feedback on the week-of-2026-05-11 prescription triggered five spec changes for the week-of-2026-05-18 Sunday Routine to apply:
+
+1. **Pressing constraint tightened (programming-spec.md §2):** DB Bench Press (id 30) and all incline pressing (Incline DB Press 611, Incline Machine Press) are now BANNED. DB Bench was previously the default substitute for the banned barbell bench; the athlete now avoids all bench-press patterns, not just barbell. Incline pressing is removed entirely because the athlete has no incline equipment. Horizontal-press default is now Machine Chest Press (alternates: Cable Chest Press, DB Floor Press 398, push-up, dip). Incline slot drops or substitutes a low-to-high cable fly / standing landmine press.
+2. **Vertical-pull default rewritten (programming-spec.md §3):** Lat Pulldown replaces Weighted Pull Up (930) as the heavy vertical-pull anchor. The athlete has no rack/band setup for weighted pull-ups. Pull Up (73, bodyweight) is allowed for higher-rep finishers only.
+3. **Rest times made mandatory and discoverable (programming-spec.md §4, NEW):** every `exercises[*].coachNotes` must start with `Rest <X>. Alt: <a>; <b>.` so the lifter sees rest in the phone UI during the set. Defaults table added. The Mon 2026-05-11 lift had no per-exercise rest visible — root cause was that the rest convention lived in §3 prose without an audit gate, so it was silently dropped.
+4. **Core variety rule added (programming-spec.md §5, NEW):** five core patterns (anti-extension, anti-rotation, anti-lateral-flexion, flexion, controlled rotation). Hit ≥3 patterns per week, ≥4 distinct movements. Plank and Hanging Leg Raise cap at 2× per week each. Triggered by the prior week's overuse of Plank and Hanging Leg Raise.
+5. **Plyometrics added (programming-spec.md §6, NEW):** plyo block goes FIRST after warm-up, 2-4 sets × 3-5 reps, 1:30-2:00 rest. Day-specific bias table. Skip Fri/Sat and deload weeks.
+6. **Cardio intervals added (programming-spec.md §7, NEW):** VO2 Max, MAP, and sprint protocols for the WODWAY curved treadmill. 1× VO2 Max OR MAP per week (Wed default) + optionally 1× sprint session (Tue/Fri). Logged as endurance Run workouts via `tp_create_workout`. Never stack against Natasha's quality run days.
+
+BUILD-LOG.md exercise table updated: DB Bench Press (30), Incline DB Press (611), and Weighted Pull Up (930) marked BANNED / NOT PROGRAMMED with substitute pointers. Added DB Floor Press (398) and a starter set of core-variety movements (Side Plank, Bird Dog, Dead Bug, Suitcase Carry, Cable Wood Chop, Russian Twist) to the movements table — most need `tp_search_exercise` confirmation at programming time.
+
+No code changes; spec-only update. The Sunday Routine running 2026-05-17 will read the updated spec when it programs the week of 2026-05-18.
 
 ## Known issues and gotchas
 
