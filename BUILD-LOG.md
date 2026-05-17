@@ -143,9 +143,10 @@ The in-repo canonical programming spec is `docs/programming-spec.md`. Read it fi
 
 Headlines:
 
-- Six lift days per week, Thursday off (scheduling constraint, not optional).
-- Standard split: Mon Lower #1 (Squat), Tue Upper #1 (Heavy Push), Wed Upper #2 (Heavy Pull), Fri Upper #3 (Hypertrophy), Sat Arms+Calves+Core (light, before long ride), Sun Lower #2 (Hinge).
-- Time targets: Mon/Sun 50 min @ 40 TSS, Tue/Wed/Fri 45 min @ 30-35 TSS, Sat 35 min @ 15 TSS.
+- Five lift days per week (Mon, Tue, Wed, Fri, Sat). **Thursday AND Sunday are non-strength recovery days** (scheduling constraint, not optional). Sunday was demoted from a lift day to recovery on 2026-05-17 because cumulative weekly CNS load was leaving the athlete fried by Sunday; the coach already programs endurance every day, so the strength week needed a net reduction, not a redistribution.
+- Standard split: Mon Lower (Squat focus + moderate hinge accessory), Tue Upper #1 (Heavy Push), Wed Upper #2 (Heavy Pull), Fri Hypertrophy + Hinge (hip-dominant at hypertrophy reps), Sat Arms+Calves+Core (light, before long ride).
+- Hinge redistribution: the old Sunday "Lower #2 (Hinge)" was the single most CNS-expensive session in the week. Removing it gives the largest CNS relief per day cut. The hinge **pattern** is preserved sub-maximally — a moderate RDL accessory on Mon (3×8, after the squat) and a hypertrophy-rep hinge anchor on Fri (3×10, submax). Trained twice weekly, never at the max-strength cost that was the problem. Weekly strength TSS drops ~194 → ~154 (~20%, concentrated on the CNS axis), which is the intended net reduction.
+- Time targets: Mon 50 min @ 40 TSS, Tue/Wed 45 min @ 30-35 TSS, Fri 45 min @ 35 TSS, Sat 35 min @ 15 TSS.
 - Main lifts get full rest (90 sec to 3:00). Accessories paired into supersets to cut idle time.
 - 2-3 core movements every session, slotted into back-half supersets so they do not bloat session time.
 - Movement variation week-to-week within the same pattern.
@@ -234,6 +235,10 @@ GitHub fork created at `brysonerandall-a11y/trainingpeaks-mcp`. Renamed previous
 ### Session 6 (2026-05-09)
 
 Created in-repo programming spec at `docs/programming-spec.md` covering: 4-week mesocycle (3 loading + 1 deload), model selection (linear / DUP / block), microcycle progression rules (`+load`, `+reps`, `+sets`, `+density`) encoded in the workout `instructions` field, deload semantics (~60% volume, intensity held), the elbow-safe pressing constraint (barbell pressing = overhead press only), Trump Tower Chicago equipment baseline, and the alternatives-in-coachNotes convention for every main movement. Audited existing repo files for banned barbell pressing: `notes-strength-api/workout-19347189.json` was clean (DB/bodyweight only); the BUILD-LOG.md exercise reference table had Bench Press (16) and Close Grip Incline Bench Press (486) listed as available — both flagged BANNED with substitute pointers in place. No active prescription file required a movement swap.
+
+### Session 7 (2026-05-17, Sunday)
+
+Demoted Sunday from a lift day to a non-strength recovery day at the athlete's request (CNS fried by Sunday; coach programs endurance daily, so the strength week needed a net cut). Split went 6-day → 5-day: Mon/Tue/Wed/Fri/Sat lift, Thu+Sun recovery. The old Sunday "Lower #2 (Hinge)" was the highest-CNS session, so cutting it specifically maximised relief; the hinge pattern was preserved sub-maximally (moderate RDL accessory Mon, hypertrophy-rep hinge Fri) rather than dropped or crammed in heavy. Updated `docs/programming-spec.md` (new "Weekly split" section, `Last updated` bump, "six-day" → "five-day") and the BUILD-LOG headlines. Added `scripts/program_week.py` — a self-contained, idempotent next-week builder that reads the prior week's `instructions` for the DUP mesocycle/progression state, builds the 5 sessions per the new split with the elbow-safe audit and `Alt:` lines, and writes via `tp_create_strength_workout`. This cloud session could not write to live TP (no MCP server / no keyring auth / TP API blocked 403), so the live calendar write must run from the local box or the Sunday Routine via that script.
 
 ## Known issues and gotchas
 
