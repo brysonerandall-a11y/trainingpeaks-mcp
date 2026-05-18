@@ -182,6 +182,21 @@ Three paths:
    ```
 3. **Inside the Sunday Routine:** the Routine body lists the tool calls in its Steps to Execute. The Routine fires Sunday 6 PM Central from a fresh Claude Code session and picks up whatever the MCP server exposes.
 
+### Writing the week to TrainingPeaks — run it from the Mac, not a cloud session
+
+`scripts/program_week.py` (added Session 7) is the canonical next-week builder. From the Mac:
+
+```bash
+cd "/Users/randall/Documents/AI & Projects/mcp-servers/trainingpeaks-mcp"
+git checkout main && git pull origin main           # get the latest plan/spec
+./.venv/bin/python scripts/program_week.py           # preview (dry run, no auth needed)
+./.venv/bin/python scripts/program_week.py --write   # create the 5 sessions in TP
+```
+
+If the write reports an auth error, refresh the cookie (`tp-mcp auth --from-browser chrome`, see below) and re-run the `--write` line.
+
+**Cloud sessions (Claude Code on the web) cannot do the `--write` step — and it is not an auth problem.** The cloud sandbox's network policy denies all `*.trainingpeaks.com` and `api.peakswaresb.com` egress (proxy returns `403 host_not_allowed`; `api.peakswaresb.com` is TLS-blocked). The cookie→token exchange, the athlete-id lookup, and the workout write all need those hosts, so even a valid cookie supplied via `TP_AUTH_COOKIE` cannot complete a write there. A cloud session CAN build and verify the plan (the dry run is offline-safe), but the live write must run from the Mac or the Sunday Routine (which also runs on the Mac). Note: merging to `main` on GitHub does NOT push code to the Mac — someone must `git pull` on the Mac before the new plan is what the routine runs.
+
 ### How to apply code changes
 
 The package is installed as a regular (non-editable) install, NOT editable. Reason: macOS Python's `.pth` file processing did not honor a path containing spaces and `&` characters, so the editable install pointed at `src/` was silently ignored at import time. Symptom was the MCP server failing to start with `ModuleNotFoundError: No module named 'tp_mcp'`.
@@ -240,6 +255,10 @@ Created in-repo programming spec at `docs/programming-spec.md` covering: 4-week 
 
 Demoted Sunday from a lift day to a non-strength recovery day at the athlete's request (CNS fried by Sunday; coach programs endurance daily, so the strength week needed a net cut). Split went 6-day → 5-day: Mon/Tue/Wed/Fri/Sat lift, Thu+Sun recovery. The old Sunday "Lower #2 (Hinge)" was the highest-CNS session, so cutting it specifically maximised relief; the hinge pattern was preserved sub-maximally (moderate RDL accessory Mon, hypertrophy-rep hinge Fri) rather than dropped or crammed in heavy. Updated `docs/programming-spec.md` (new "Weekly split" section, `Last updated` bump, "six-day" → "five-day") and the BUILD-LOG headlines. Added `scripts/program_week.py` — a self-contained, idempotent next-week builder that reads the prior week's `instructions` for the DUP mesocycle/progression state, builds the 5 sessions per the new split with the elbow-safe audit and `Alt:` lines, and writes via `tp_create_strength_workout`. This cloud session could not write to live TP (no MCP server / no keyring auth / TP API blocked 403), so the live calendar write must run from the local box or the Sunday Routine via that script.
 
+### Session 8 (2026-05-17, Sunday — cloud session)
+
+Ran from Claude Code on the web (a cloud sandbox, not the Mac). Verified next week's plan via `scripts/program_week.py`: W1 of a fresh DUP mesocycle (the prior-week lookup hit `AUTH_INVALID` and fell back to W1 by design; athlete confirmed W1 is correct), 5 sessions Mon 5/18–Sat 5/23, Thu/Sun empty, elbow-safe audit clean, hinge redistributed sub-maximally, weekly TSS 154. Investigated whether the live write could happen from the cloud and root-caused why it can't: the environment's network allowlist, not auth — every TP host returns `403 host_not_allowed` and `api.peakswaresb.com` is TLS-blocked; `TP_AUTH_COOKIE` would load a cookie but the blocked hosts still defeat the write. Merged PR #3 (`feat(programming): make Sunday a non-strength recovery day (#3)`, squash `6e779a2`), so the 5-day split is now canonical on `main`. Documented the cloud-vs-Mac write procedure and the network-block gotcha (above). The live calendar write for the week of 5/18 still needs to run from the Mac (`git pull` then `program_week.py --write`), or be left to the Sunday Routine once the Mac has pulled `main`.
+
 ## Known issues and gotchas
 
 1. **Editable installs are broken on this filesystem.** The `.pth` mechanism does not honor the `~/Documents/AI & Projects/mcp-servers/trainingpeaks-mcp/src` path. Stay on regular installs (`pip install .`).
@@ -253,6 +272,8 @@ Demoted Sunday from a lift day to a non-strength recovery day at the athlete's r
 5. **TP exercise library matches are scored by title fuzziness.** Bare "Barbell Curl" returns "Reverse Barbell Curl" because of how the scoring breaks ties. Use precise names ("Barbell Bicep Curl", id 9) to avoid surprises.
 
 6. **The Sunday Routine fires from a fresh Claude Code session.** Whatever code is installed at that moment is what runs. After any code change, reinstall + relaunch before the next Sunday at 6 PM.
+
+7. **Cloud sessions are network-blocked from TrainingPeaks.** Claude Code on the web runs in a sandbox whose egress allowlist excludes every TP host (`403 host_not_allowed`; `api.peakswaresb.com` TLS-blocked). This is NOT an auth issue — `TP_AUTH_COOKIE` would load a cookie, but the cookie→token exchange and the write still hit blocked hosts. A cloud session can build and verify a week (the dry run is offline-safe) but never `--write`; that runs from the Mac or the Sunday Routine. Merging to `main` does not propagate to the Mac — `git pull` there first.
 
 ## Quick reference: re-running the migration
 
