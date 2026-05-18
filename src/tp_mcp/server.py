@@ -956,7 +956,10 @@ TOOLS = [
         inputSchema={
             "type": "object",
             "properties": {
-                "date": {"type": "string", "description": "YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS (start time used as time-of-day)"},
+                "date": {
+                    "type": "string",
+                    "description": "YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS (start time used as time-of-day)",
+                },
                 "title": {"type": "string"},
                 "instructions": {"type": "string"},
                 "duration_minutes": {"type": "integer"},
@@ -978,11 +981,19 @@ TOOLS = [
                                 "items": {
                                     "type": "object",
                                     "properties": {
-                                        "name": {"type": "string", "description": "Exercise name (resolved from TP library)"},
+                                        "name": {
+                                            "type": "string",
+                                            "description": "Exercise name (resolved from TP library)",
+                                        },
                                         "exerciseId": {"description": "Numeric TP exercise id (alternative to name)"},
                                         "parameters": {
                                             "type": "array",
-                                            "description": "Override the inferred parameter list. Values: Reps, RepsPerSide, WeightLb, WeightKg, WeightPerSideLb, WeightPerSideKg, Duration, DistanceMeters, DistanceMiles.",
+                                            "description": (
+                                                "Override the inferred parameter list. Values: "
+                                                "Reps, RepsPerSide, WeightLb, WeightKg, "
+                                                "WeightPerSideLb, WeightPerSideKg, Duration, "
+                                                "DistanceMeters, DistanceMiles."
+                                            ),
                                             "items": {"type": "string"},
                                         },
                                         "sets": {

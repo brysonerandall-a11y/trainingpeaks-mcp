@@ -98,7 +98,18 @@ class TestListTools:
             "tp_unpair_workout",
         }
         assert v2_tools.issubset(names)
-        assert len(names) == len(core_tools) + len(v2_tools)
+        # Strength-builder extension (this fork; see BUILD-LOG.md).
+        strength_tools = {
+            "tp_get_strength_workout",
+            "tp_list_strength_workouts",
+            "tp_create_strength_workout",
+            "tp_update_strength_workout",
+            "tp_delete_strength_workout",
+            "tp_search_exercise",
+            "tp_get_strength_history",
+        }
+        assert strength_tools.issubset(names)
+        assert len(names) == len(core_tools) + len(v2_tools) + len(strength_tools)
 
     @pytest.mark.asyncio
     async def test_create_workout_schema_includes_new_fields(self):

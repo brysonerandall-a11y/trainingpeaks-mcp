@@ -50,7 +50,7 @@ class StrengthClient:
         # We don't open its httpx client; we only call _ensure_access_token().
         self._tp_client = TPClient(timeout=timeout)
 
-    async def __aenter__(self) -> "StrengthClient":
+    async def __aenter__(self) -> StrengthClient:
         await self._ensure_client()
         # The wrapped TPClient also needs its own httpx client to perform
         # the cookie-for-token exchange when the cache is stale.
