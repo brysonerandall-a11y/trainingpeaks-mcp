@@ -687,7 +687,7 @@ def _build_prescription(
     return {
         "exercise": {
             "id": str(exercise.get("exerciseId")),
-            "ownerId": exercise.get("ownerId", 2000301),
+            "ownerId": exercise.get("ownerId") or 2000301,
             "title": title,
             "videoUrl": exercise.get("videoUrl"),
             "instructions": exercise.get("instructions"),
