@@ -6,7 +6,7 @@ The full personal/lifter-profile spec lives outside this repo at
 `~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md`.
 Anything written here takes precedence on conflict — it is the in-repo source of truth for *how to program*, not *who the lifter is*.
 
-Last updated: 2026-05-09.
+Last updated: 2026-05-17.
 
 ---
 
@@ -59,6 +59,31 @@ If the user asks for a generic "program me a week" without naming a phase, the a
 - DUP, week N of a 4-week mesocycle, pick up from where the prior week left off.
 - If no prior week exists, start at W1 of a fresh mesocycle.
 - If the next race / A-event is within 12 weeks (`tp_get_focus_event`), switch to Block.
+
+---
+
+## 1A. Weekly split (microcycle layout) — HARD SCHEDULING RULE
+
+**Five lift days per week. Thursday AND Sunday are non-strength recovery days.** This is a scheduling constraint, not optional. Sunday was a lift day until 2026-05-17; it was demoted to recovery because cumulative weekly CNS load left the athlete fried by Sunday and the endurance coach already programs every day, so the strength week needed a *net* reduction, not a redistribution.
+
+| Day | Session | Time | TSS | Anchor |
+|---|---|---|---|---|
+| Mon | Lower — Squat focus + moderate hinge accessory | 50 min | ~40 | Back Squat (heavy); RDL 3×8 submax |
+| Tue | Upper #1 — Heavy Push | 45 min | ~32 | OHP / DB or machine horizontal press |
+| Wed | Upper #2 — Heavy Pull | 45 min | ~32 | Weighted pull-up / chest-supported row |
+| Thu | **Recovery — no strength** | — | — | — |
+| Fri | Hypertrophy + Hinge | 45 min | ~35 | Hip-dominant hinge at hypertrophy reps + upper hypertrophy |
+| Sat | Arms + Calves + Core (light, before the long ride) | 35 min | ~15 | Isolation only, low CNS |
+| Sun | **Recovery — no strength** | — | — | — |
+
+**Hinge redistribution rule (do not undo this).** The pre-2026-05-17 split had two lower days: Mon (Squat) and Sun (Hinge). Sunday's hinge session was the single most CNS-expensive session in the week, so cutting *that* day specifically maximises CNS relief per day removed. The hinge **pattern** must still be trained — but sub-maximally, never as a max-strength day:
+
+- Mon: a moderate bilateral hinge accessory after the squat (e.g. RDL 3×8 at submax load), `coachNotes` flagged "replaces the old Sunday hinge day at lower CNS cost".
+- Fri: a hip-dominant hinge anchor at hypertrophy reps (e.g. Single-Leg RDL or RDL 3×10, submax), opening the Hypertrophy day.
+
+Net effect: the posterior chain is trained twice weekly without a dedicated heavy hinge day. Weekly strength TSS lands ~154 (was ~194 on the 6-day split) — the ~20% reduction is the *point*, concentrated on the CNS axis. Do not "make up" the lost volume by adding sets elsewhere; that defeats the reason Sunday was cut.
+
+**When the user asks for "the week", build exactly these five sessions (Mon, Tue, Wed, Fri, Sat).** Never program Thursday or Sunday strength. Race-phase modulation still applies on top of this (5+ weeks out full 5-day program; 2-3 weeks out drop the Sat lift; race week / post-race no strength).
 
 ---
 
@@ -171,7 +196,7 @@ Audit run 2026-05-09 against the `claude/training-peaks-periodization-pressing-h
 ## 5. How a future session uses this file
 
 1. Read this file first when prompted to program or reprogram a strength week.
-2. Read `BUILD-LOG.md` for the exercise id reference and the six-day split structure.
+2. Read `BUILD-LOG.md` for the exercise id reference, then §1A above for the canonical five-day split (Mon/Tue/Wed/Fri/Sat; Thu+Sun recovery).
 3. Read the prior week's workouts via `tp_get_workouts` and parse the `instructions` field for the `Progression:` line on each main lift.
 4. Decide the current mesocycle week (W1-W4) and the periodization model (linear / DUP / block) per Section 1.
 5. Build the new week's blocks. For every main movement, attach an `Alt:` line to `coachNotes` per Section 3.
