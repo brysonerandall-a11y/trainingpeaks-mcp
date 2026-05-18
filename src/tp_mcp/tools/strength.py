@@ -24,9 +24,10 @@ import logging
 import os
 import re
 import time
-from datetime import datetime, date as date_type
+from datetime import date as date_type
+from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from tp_mcp.client.strength_http import StrengthClient
 
@@ -80,10 +81,11 @@ async def _load_library() -> dict[str, Any]:
         async with StrengthClient() as c:
             r = await c.get("libraryContent")
         if r.success and r.data:
-            _lib_memory_cache = r.data
+            lib_data = cast("dict[str, Any]", r.data)
+            _lib_memory_cache = lib_data
             _LIB_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-            _LIB_CACHE_PATH.write_text(json.dumps(r.data))
-            return _lib_memory_cache
+            _LIB_CACHE_PATH.write_text(json.dumps(lib_data))
+            return lib_data
         logger.warning("Live library fetch failed: %s", r.message)
     except Exception as e:
         logger.warning("Live library fetch errored: %s", e)
@@ -319,10 +321,10 @@ async def tp_get_strength_history(
                         )
                     flat_sets.append(entry)
                 # Compute the heaviest weight set.
-                weights = [
-                    s.get("weight_lb")
+                weights: list[float] = [
+                    w
                     for s in flat_sets
-                    if isinstance(s.get("weight_lb"), (int, float))
+                    if isinstance(w := s.get("weight_lb"), (int, float))
                 ]
                 max_weight = max(weights) if weights else None
                 max_weight_reps = None
@@ -347,7 +349,7 @@ async def tp_get_strength_history(
                 )
 
     # Sort each exercise's history most-recent first.
-    for ex_title, entries in history.items():
+    for entries in history.values():
         entries.sort(key=lambda e: e["date"] or "", reverse=True)
 
     return {
