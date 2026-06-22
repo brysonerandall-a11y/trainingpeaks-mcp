@@ -49,6 +49,17 @@ Within whatever phase the workbook dictates, record each main lift's week-over-w
 
 The detailed loading targets (set, rep, and percent ranges per phase) live in the workbook, not here.
 
+### Autoregulation mechanic (estimated 1RM + pre-filled targets, added 2026-06-22)
+
+The Sunday routine closes the loop on Bryce's actual logged performance instead of inferring load from the workout-level RPE:
+
+1. **Estimated 1RM** per main lift from `tp_get_strength_history`: take the heaviest logged set (weight W x reps R) and compute `eRM = W * (1 + R/30)` (Epley). This objective anchor replaces the old RPE-bracket guess.
+2. **Target weight** = the phase %1RM band (from the workbook) x eRM, rounded to loads Bryce has (nearest available DB pair; nearest 5 lb on bars and machines).
+3. **Double progression**: topped the rep range on all working sets last week -> advance weight (+5 lb upper / DB, +5-10 lb lower compound, +2.5-5 accessory). Missed the rep target -> hold, or drop to the eRM-implied weight for the target reps. Bodyweight progresses by reps/seconds (~10% if exceeded).
+4. **Pre-fill** the suggested target into each working set's `weight_lb`. TrainingPeaks keeps planned vs. executed separate, so Bryce's phone-logged actuals still feed the next week's history honestly. Record the eRM and last-week reference in `coachNotes` as `Target Xlb (~Y% of est. 1RM Z lb; last week <load>x<reps>)`.
+
+This supersedes the older RPE-bracket load bump (RPE 1-3 +10-15 lb, etc.). The recorded `Progression:` rule in the `instructions` field still notes which lever moved (+load / +reps / +sets / +density). Decided with Bryce 2026-06-22: pre-fill the number, standard double progression (bump the first week he tops the range).
+
 ---
 
 ## 1A. Weekly split (microcycle layout) — HARD SCHEDULING RULE
@@ -211,6 +222,6 @@ Audit run 2026-06-22 (reconciliation to the six-day plan): updated section 1 (pe
 2. Read `BUILD-LOG.md` for the exercise id reference. Use section 1A above for the canonical six-day split (Mon through Sat; Sunday off; Thursday is a lift day).
 3. Read the prior week's workouts via `tp_get_workouts` and parse the `instructions` field for the `Progression:` line on each main lift.
 4. Determine the current phase from the workbook by the upcoming Monday's date (see section 1). Carry progression forward per section 1.
-5. Build the new week's blocks. For every main movement, attach an `Alt:` line to `coachNotes` per section 3, respecting both bans. Do not repeat any movement within the week.
+5. Build the new week's blocks. Pre-fill each working set's `weight_lb` with the autoregulation target (see the Autoregulation mechanic in section 1). For every main movement, attach an `Alt:` line to `coachNotes` per section 3, respecting both bans. Do not repeat any movement within the week.
 6. Run the section 2 (elbow-safe) and section 2A (front-rack) audit checklists before calling `tp_create_strength_workout`.
 7. Update the workout `instructions` with the current phase and the chosen progression rule.
