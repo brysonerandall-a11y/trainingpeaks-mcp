@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
-"""Build next week's hybrid-lift strength block per docs/programming-spec.md.
+"""SUPERSEDED 2026-06-22. DO NOT RUN. Builds the retired five-day strength split.
 
-Canonical split (spec §1A, set 2026-05-17): five lift days — Mon, Tue, Wed,
-Fri, Sat. Thursday AND Sunday are non-strength recovery days. The old Sunday
-"Lower #2 (Hinge)" was the highest-CNS session; it was cut and the hinge
-pattern redistributed sub-maximally (moderate RDL Mon, hypertrophy-rep hinge
-Fri). This script is what the Sunday Routine runs to materialise that week.
+This script materialises the OLD five-day split (Mon, Tue, Wed, Fri, Sat, with
+Thursday and Sunday off) under a retired four-week DUP mesocycle. That split, the
+DUP mesocycle, and the "Front Squat" alternative in the Monday squat note are all
+retired as of 2026-06-22. The current program is a six-day plan (Monday through
+Saturday, Sunday off, Thursday IS a lift day) under a fixed 13-week block
+macrocycle, with a hard ban on barbell bench AND on every front-rack movement
+(front squat included).
 
-Usage:
-    python scripts/program_week.py                 # dry run, prints the plan
-    python scripts/program_week.py --write          # create the workouts in TP
-    python scripts/program_week.py --week-start 2026-05-18 [--write]
+The live programming no longer runs this file. Weekly strength is now written by
+two scheduled routines that call the MCP tools directly:
+    ~/.claude/scheduled-tasks/hybrid-lift-programmer/SKILL.md   (Sunday 6 PM Central)
+    ~/.claude/scheduled-tasks/hybrid-lift-reprogrammer/SKILL.md (manual)
 
-Default is a dry run so it is always safe to inspect "what's ahead" without
-touching the live calendar. --write requires a working tp-mcp auth context.
+Sources of truth for the current plan:
+    ~/Documents/AI & Projects/projects/hybrid-strength-plan/Hybrid-Strength-Plan_2026-06-22_to_2026-09-20.xlsx
+    ~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md
+
+This file is kept only as historical reference. It refuses to run by default. To
+run it for inspection, set ALLOW_RETIRED_PROGRAM_WEEK=1 in the environment.
 """
 
 from __future__ import annotations
@@ -22,6 +28,7 @@ import argparse
 import asyncio
 import datetime as dt
 import json
+import os
 import re
 import sys
 
@@ -402,6 +409,18 @@ def render(sessions: list[dict], dates: dict[int, dt.date], meso: int) -> str:
 
 
 async def main() -> int:
+    if os.environ.get("ALLOW_RETIRED_PROGRAM_WEEK") != "1":
+        print(
+            "program_week.py is SUPERSEDED (2026-06-22) and builds the retired "
+            "five-day split with a now-banned front-squat alternative. It will "
+            "not run.\n"
+            "The current six-day plan is written by the hybrid-lift-programmer "
+            "and hybrid-lift-reprogrammer routines. See the 13-week workbook and "
+            "hybrid_lifting_program.md.\n"
+            "Set ALLOW_RETIRED_PROGRAM_WEEK=1 to override for inspection only.",
+            file=sys.stderr,
+        )
+        return 3
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--week-start", help="YYYY-MM-DD Monday; default = next Monday")
     ap.add_argument("--write", action="store_true",

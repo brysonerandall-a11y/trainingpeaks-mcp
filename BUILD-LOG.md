@@ -101,7 +101,7 @@ Confirmed via `tp_search_exercise` during build. Use these to cross-check on fut
 | Movement | TP id | Notes |
 |---|---|---|
 | Back Squat | 131 | Quad-dominant primary |
-| Front Squat | 143 | Trunk-honest accessory |
+| Front Squat | 143 | **BANNED** (front-rack movement) as of 2026-06-22; see programming-spec.md §2A. Substitute: Hack Squat, Leg Press, Goblet Squat (DB), or Bulgarian Split Squat. |
 | Paused Back Squat | 5356 | Variation |
 | Deadlift | 141 | "Conventional Deadlift" maps here |
 | Romanian Deadlift | 154 | |
@@ -139,22 +139,28 @@ Movements NOT in the library (substitute with above): Pallof Press, Lying Leg Cu
 
 ## Programming spec snapshot
 
-The in-repo canonical programming spec is `docs/programming-spec.md`. Read it first for periodization rules, the elbow-safe pressing constraint, equipment baseline, and the alternatives convention. The personal/lifter-profile spec (off-repo) lives in `~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md`. On conflict, `docs/programming-spec.md` wins.
+The current plan is owned by two off-repo sources of truth, in this order:
 
-Headlines:
+1. `~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md` (the lifter profile and constraints).
+2. `~/Documents/AI & Projects/projects/hybrid-strength-plan/Hybrid-Strength-Plan_2026-06-22_to_2026-09-20.xlsx` (the 13-week block macrocycle: phases, weekly template, exercise rotation pools, VO2 ramp, taper).
 
-- Five lift days per week (Mon, Tue, Wed, Fri, Sat). **Thursday AND Sunday are non-strength recovery days** (scheduling constraint, not optional). Sunday was demoted from a lift day to recovery on 2026-05-17 because cumulative weekly CNS load was leaving the athlete fried by Sunday; the coach already programs endurance every day, so the strength week needed a net reduction, not a redistribution.
-- Standard split: Mon Lower (Squat focus + moderate hinge accessory), Tue Upper #1 (Heavy Push), Wed Upper #2 (Heavy Pull), Fri Hypertrophy + Hinge (hip-dominant at hypertrophy reps), Sat Arms+Calves+Core (light, before long ride).
-- Hinge redistribution: the old Sunday "Lower #2 (Hinge)" was the single most CNS-expensive session in the week. Removing it gives the largest CNS relief per day cut. The hinge **pattern** is preserved sub-maximally — a moderate RDL accessory on Mon (3×8, after the squat) and a hypertrophy-rep hinge anchor on Fri (3×10, submax). Trained twice weekly, never at the max-strength cost that was the problem. Weekly strength TSS drops ~194 → ~154 (~20%, concentrated on the CNS axis), which is the intended net reduction.
-- Time targets: Mon 50 min @ 40 TSS, Tue/Wed 45 min @ 30-35 TSS, Fri 45 min @ 35 TSS, Sat 35 min @ 15 TSS.
-- Main lifts get full rest (90 sec to 3:00). Accessories paired into supersets to cut idle time.
-- 2-3 core movements every session, slotted into back-half supersets so they do not bloat session time.
-- Movement variation week-to-week within the same pattern.
-- **Periodization (see programming-spec.md §1):** default 4-week mesocycle = 3 loading weeks + 1 deload (~60% volume, intensity held). Linear for strength blocks, DUP for mixed/general phases, Block for race builds (≤12 weeks out). Each loading week shows a single explicit progression rule (`+load`, `+reps`, `+sets`, or `+density`), recorded in the workout `instructions` field as `Progression: <rule> (W<n> of 4)` so a future session can read it back.
-- **Pressing constraint (see programming-spec.md §2, HARD RULE):** barbell pressing is overhead press only. All horizontal/incline pressing must be DB, machine, or cable. Reason: mild elbow tendonosis flares with barbell bench/incline. Banned ids include Bench Press (16) and Close Grip Incline Bench Press (486); substitutes are flagged in the movements table above.
-- **Equipment & alternatives (see programming-spec.md §3):** default site is Trump Tower Chicago Fitness Club (assume well-equipped commercial gym). Every "main movement" must include 1-2 alternative movements in the `coachNotes` field on the same prescription where rest times go, so there is a fallback if equipment is missing.
-- Race-phase modulation: 5+ weeks out full program, 2-3 weeks out drop Sat lift, race week and post-race deload have no strength.
-- Weight columns always blank in the prescription; Bryce logs actual loads on his phone during the session.
+The in-repo `docs/programming-spec.md` is the technical companion: MCP payload mechanics, the elbow-safe and front-rack bans, the equipment baseline, the alternatives convention, and the exercise-id discipline. It was reconciled to this plan on 2026-06-22. On any conflict about the PLAN (the split, the phases, exercise selection), the memory file and the workbook win; the spec governs only the in-repo HOW-to-write mechanics.
+
+Headlines (current as of 2026-06-22):
+
+- Six lift days, Monday through Saturday. Sunday is OFF (Natasha's long run). Thursday IS a lift day. This replaces the 2026-05-17 five-day split (Thursday and Sunday off), which is retired.
+- Split: Mon upper push + trunk; Tue primary hard lower (squat and power, freshest legs); Wed upper pull (Bryce runs his own VO2 run this day); Thu posterior chain and hamstring durability (the limiter day, moderate); Fri light power, accessory, carries; Sat low-fatigue durability before the long ride.
+- Only about two of the six lifts are truly hard (Tuesday lower and one upper day); the rest are moderate or deliberately light.
+- Periodization is the workbook's fixed 13-week block plan, NOT a generic 4-week DUP mesocycle. Phases: Wk1 Calibration, Wk2-4 Strength + lean mass, Wk5-8 Maximal strength + power, Wk9-11 Conversion to race durability, Wk12-13 Taper. A-race IRONMAN 70.3 Michigan 2026-09-20. After that date the plan must be rebuilt; do not improvise past it.
+- Pressing constraint (programming-spec.md §2, HARD RULE): barbell pressing is overhead only; all horizontal and incline pressing is DB, machine, or cable (elbow tendinosis). Banned ids include Bench Press (16) and Close Grip Incline Bench Press (486).
+- Front-rack constraint (programming-spec.md §2A, HARD RULE, new 2026-06-22): no front squat, front-rack lunge, Zercher, cleans, or hang cleans. Substitute back-squat variants, goblet squat (DB at chest), Bulgarian split squat, hack squat, or leg press. Avoid Olympic lifts.
+- No movement repeats anywhere in the Monday-to-Saturday week; rotate within the workbook pattern pools, and when a movement returns in a later week it returns heavier, faster, or at a harder tempo.
+- Limiter bias (June 14 race: late hamstring near-cramp and run-cadence collapse): every week, bias eccentric and fatigue-resistant hamstrings, calf and foot stiffness, hip and glute stability, and trunk endurance.
+- Equipment and alternatives (programming-spec.md §3): default site Trump Tower Chicago (assume a well-equipped commercial gym); every main movement carries 1-2 alternatives in `coachNotes`, where rest times go, and those alternatives must also respect both bans.
+- Per-day duration / TSS: Mon 45/30, Tue 50/40, Wed 45/30, Thu 50/38, Fri 40/22, Sat 35/15. Weight columns always blank; Bryce logs loads on his phone.
+- VO2 is Bryce's own (running first from Wk2 on Wednesdays, cycling around Wk5); the strength layer never programs endurance and never edits a Natasha workout.
+
+The retired five-day script `scripts/program_week.py` is superseded and refuses to run by default; the live routines write the week via the MCP tools directly.
 
 ## Operational details
 
@@ -258,6 +264,10 @@ Demoted Sunday from a lift day to a non-strength recovery day at the athlete's r
 ### Session 8 (2026-05-17, Sunday — cloud session)
 
 Ran from Claude Code on the web (a cloud sandbox, not the Mac). Verified next week's plan via `scripts/program_week.py`: W1 of a fresh DUP mesocycle (the prior-week lookup hit `AUTH_INVALID` and fell back to W1 by design; athlete confirmed W1 is correct), 5 sessions Mon 5/18–Sat 5/23, Thu/Sun empty, elbow-safe audit clean, hinge redistributed sub-maximally, weekly TSS 154. Investigated whether the live write could happen from the cloud and root-caused why it can't: the environment's network allowlist, not auth — every TP host returns `403 host_not_allowed` and `api.peakswaresb.com` is TLS-blocked; `TP_AUTH_COOKIE` would load a cookie but the blocked hosts still defeat the write. Merged PR #3 (`feat(programming): make Sunday a non-strength recovery day (#3)`, squash `6e779a2`), so the 5-day split is now canonical on `main`. Documented the cloud-vs-Mac write procedure and the network-block gotcha (above). The live calendar write for the week of 5/18 still needs to run from the Mac (`git pull` then `program_week.py --write`), or be left to the Sunday Routine once the Mac has pulled `main`.
+
+### Session 9 (2026-06-22, Sunday)
+
+The Sunday `hybrid-lift-programmer` run found a full week of stale, non-compliant strength sessions already on the calendar (a six-day-with-Sunday layout, front squat, barbell bench), written earlier that day by an unidentified generator running pre-2026-05-17 logic. Bryce deleted them and redirected the work: researched and built a complete evidence-led 13-week strength macrocycle from 2026-06-22 to the 2026-09-20 A-race (IRONMAN 70.3 Michigan), shipped as an 8-tab workbook at `~/Documents/AI & Projects/projects/hybrid-strength-plan/Hybrid-Strength-Plan_2026-06-22_to_2026-09-20.xlsx` (with `build_plan.py` to regenerate it), and loaded week 1 (six sessions Mon-Sat) into TrainingPeaks. The plan returns to a SIX-day split (Mon-Sat, Sunday off, Thursday now a lift day) and adds a hard front-rack ban (no front squat, front-rack lunge, Zercher, cleans) on top of the existing barbell-bench ban. Both routines and the off-repo memory file were rewritten to the new rules. On 2026-06-22 the in-repo programming surface was reconciled to match: this BUILD-LOG snapshot and the Front Squat reference row were updated, `docs/programming-spec.md` was reconciled (six-day split in §1A, new §2A front-rack ban, the §3 squat-alternative ladder de-front-squatted, periodization in §1 deferred to the workbook), and `scripts/program_week.py` was marked SUPERSEDED and set to refuse to run by default. The workbook and the memory file are the plan authority; the spec is the in-repo technical companion.
 
 ## Known issues and gotchas
 

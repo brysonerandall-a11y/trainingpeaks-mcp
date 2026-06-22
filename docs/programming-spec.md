@@ -1,89 +1,77 @@
 # TrainingPeaks Programming Skill — Spec
 
-In-repo canonical spec for the hybrid-lift programming skill. This is the durable record a future Claude session reads before generating a week of strength workouts via the strength MCP tools (`tp_create_strength_workout`, `tp_update_strength_workout`, `tp_search_exercise`).
+In-repo technical companion for the hybrid-lift programming skill. This is the durable record a future Claude session reads for the in-repo mechanics of writing a week of strength workouts via the strength MCP tools (`tp_create_strength_workout`, `tp_update_strength_workout`, `tp_search_exercise`): payload shape, the elbow-safe and front-rack bans, the equipment baseline, the alternatives convention, and the exercise-id discipline.
 
-The full personal/lifter-profile spec lives outside this repo at
-`~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md`.
-Anything written here takes precedence on conflict — it is the in-repo source of truth for *how to program*, not *who the lifter is*.
+This file is NOT the plan authority. The plan is owned off-repo, in this order:
 
-Last updated: 2026-05-17.
+1. `~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md` (who the lifter is, the constraints, the current split).
+2. `~/Documents/AI & Projects/projects/hybrid-strength-plan/Hybrid-Strength-Plan_2026-06-22_to_2026-09-20.xlsx` (the 13-week block macrocycle: phases, weekly template, exercise rotation pools, VO2 ramp, taper).
+
+On any conflict about the PLAN (the split, the phase, exercise selection), the memory file and the workbook win. This spec governs only the in-repo HOW-to-write mechanics. Where this spec once described the plan itself (the periodization model in section 1 and the weekly split in section 1A), it now defers to those two sources and records only what is still mechanically true.
+
+Last updated: 2026-06-22 (reconciled to the six-day plan and the 13-week macrocycle; added the front-rack ban, section 2A).
 
 ---
 
-## 1. Periodization
+## 1. Periodization (owned by the workbook)
 
-### Mesocycle
+The periodization is NOT chosen here. It is the fixed 13-week block macrocycle in the workbook, running from 2026-06-22 to the 2026-09-20 A-race (IRONMAN 70.3 Michigan). Do not default to a generic mesocycle model. The retired 4-week DUP, linear, and block selection that this section used to prescribe no longer applies.
 
-- **Default mesocycle = 4 weeks**: 3 loading weeks with progressive overload, then 1 deload week.
-- Pick the periodization model based on the **current goal**:
+### Phases (read the workbook for the loading details)
 
-| Phase / goal | Model | What it means in practice |
+| Weeks | Dates | Phase |
 |---|---|---|
-| Strength block (off-season, peak strength focus) | **Linear** | One quality per week (intensity rises week to week), reps drop. Week 1 ~75% × 8, Week 2 ~80% × 6, Week 3 ~85% × 4-5, Week 4 deload. |
-| Mixed / general phase (default when there is no race or pure-strength goal) | **DUP** (Daily Undulating Periodization) | Within a week, vary rep schemes across sessions: e.g. Mon heavy/low-rep, Wed moderate, Fri high-rep/hypertrophy. Loads on each session progress week-over-week independently. |
-| Race build (≤ 12 weeks out from an A race) | **Block** | Sequential emphasis: accumulation block (volume) → transmutation (strength-endurance) → realization (taper/peaking). Strength volume drops as race approaches; see `BUILD-LOG.md` for the existing race-phase modulation rules (5+ weeks out full program, 2-3 weeks drop Sat lift, race week / post-race no strength). |
+| Wk 1 | Jun 22-28 | Calibration: set estimated 1RM anchors, groove elbow-safe lifts, prime tendons, low-dose jumps. |
+| Wk 2-4 | Jun 29-Jul 19 | Strength + lean-mass accumulation. Light deload end of Wk 4. |
+| Wk 5-8 | Jul 20-Aug 16 | Maximal strength + power. Programmed deload Wk 8. |
+| Wk 9-11 | Aug 17-Sep 6 | Conversion to race durability. |
+| Wk 12-13 | Sep 7-20 | Taper. Cut volume 50-60%, hold load quality. Race Sun Sep 20. |
 
-If the goal is unclear, default to **DUP**.
+After 2026-09-20 the plan is exhausted; do not improvise past it. Pause and flag that a new macrocycle is needed.
 
-### Microcycle (week)
+### Microcycle progression (still the in-repo mechanic)
 
-Each loading week must show **clear progression** versus the prior week on at least one of: load, reps, or density. Encode the rule as one of:
+Within whatever phase the workbook dictates, record each main lift's week-over-week progression in the workout `instructions` field so a future session can read it back. Use one rule per main lift per week:
 
 | Progression rule | Encoding | Example |
 |---|---|---|
-| `+load` | +2.5-5% on main lift, same reps | W1 Squat 4×6 @ 75% → W2 4×6 @ 77.5% |
-| `+reps` | Same load, +1 rep per set | W1 RDL 3×8 → W2 3×9 |
-| `+sets` | Same load × reps, add a working set | W1 Press 3×8 → W2 4×8 |
-| `+density` | Same total work in less time (cut rest 15-30 sec, or add a paired exercise) | W1 90 sec rest → W2 75 sec rest |
+| `+load` | +2.5-5% on main lift, same reps | W1 Squat 4×6 @ 75% to W2 4×6 @ 77.5% |
+| `+reps` | Same load, +1 rep per set | W1 RDL 3×8 to W2 3×9 |
+| `+sets` | Same load × reps, add a working set | W1 Press 3×8 to W2 4×8 |
+| `+density` | Same total work in less time (cut rest 15-30 sec, or add a paired exercise) | W1 90 sec rest to W2 75 sec rest |
 
 **Rules:**
 
 1. Pick **one** progression rule per main lift per week. Do not stack +load and +reps on the same lift in the same week.
-2. Across the 3 loading weeks of a mesocycle, the cumulative progression should be ~5-10% more total work (load × reps × sets) on main lifts.
-3. Accessories progress on **+reps or +sets** preferentially; they take +load only when the rep ceiling for the prescribed range is hit.
-4. The progression rule for each main lift is recorded in the workout `instructions` field as `Progression: <rule>` so a future session can read it back. Example: `Progression: +load 2.5% (W2 of 4)`.
-5. A future session reconstructs the next week's prescription by reading the prior week's `instructions` field plus the executed weights, then advancing per the recorded rule.
+2. Accessories progress on **+reps or +sets** preferentially; they take +load only when the rep ceiling for the prescribed range is hit.
+3. Record the rule in the `instructions` field as `Progression: <rule>` (for example `Progression: +load 2.5%`). A future session reconstructs the next week by reading the prior week's `instructions` plus the executed weights, then advancing per the recorded rule and the current phase.
+4. On a programmed deload week (the workbook marks them), cut volume by ~40-60% (cut sets first, hold top-set intensity) and mark the `instructions` with `Deload: volume cut, intensity held`.
 
-### Deload week (week 4)
-
-- **Volume ~60% of the prior loading week.** Cut sets first (e.g. 4×6 → 2-3×6), not reps.
-- **Intensity held**: keep top-set %1RM the same so neuromuscular pattern is preserved.
-- Skip the high-rep / metabolic finishers and most supersets.
-- Core volume cut by half.
-- Mark the workout `instructions` with `Deload: ~60% volume, intensity held` so it is unambiguous on the calendar.
-
-### Picking a model in practice
-
-If the user asks for a generic "program me a week" without naming a phase, the assumption is:
-
-- DUP, week N of a 4-week mesocycle, pick up from where the prior week left off.
-- If no prior week exists, start at W1 of a fresh mesocycle.
-- If the next race / A-event is within 12 weeks (`tp_get_focus_event`), switch to Block.
+The detailed loading targets (set, rep, and percent ranges per phase) live in the workbook, not here.
 
 ---
 
 ## 1A. Weekly split (microcycle layout) — HARD SCHEDULING RULE
 
-**Five lift days per week. Thursday AND Sunday are non-strength recovery days.** This is a scheduling constraint, not optional. Sunday was a lift day until 2026-05-17; it was demoted to recovery because cumulative weekly CNS load left the athlete fried by Sunday and the endurance coach already programs every day, so the strength week needed a *net* reduction, not a redistribution.
+**Six lift days, Monday through Saturday. Sunday is OFF.** Thursday IS a lift day. This replaces the 2026-05-17 five-day split (Thursday and Sunday off), which is retired. The week is built around Bryce's fixed weekend: Saturday long ride, Sunday long run. The exact intensities per phase live in the workbook; the table below is the durable layout.
 
-| Day | Session | Time | TSS | Anchor |
+| Day | Session focus | Time | TSS | Notes |
 |---|---|---|---|---|
-| Mon | Lower — Squat focus + moderate hinge accessory | 50 min | ~40 | Back Squat (heavy); RDL 3×8 submax |
-| Tue | Upper #1 — Heavy Push | 45 min | ~32 | OHP / DB or machine horizontal press |
-| Wed | Upper #2 — Heavy Pull | 45 min | ~32 | Weighted pull-up / chest-supported row |
-| Thu | **Recovery — no strength** | — | — | — |
-| Fri | Hypertrophy + Hinge | 45 min | ~35 | Hip-dominant hinge at hypertrophy reps + upper hypertrophy |
-| Sat | Arms + Calves + Core (light, before the long ride) | 35 min | ~15 | Isolation only, low CNS |
-| Sun | **Recovery — no strength** | — | — | — |
+| Mon | Upper strength, push focus + trunk | 45 min | ~30 | Legs rest after Sunday's long run. |
+| Tue | PRIMARY hard lower (squat and power) | 50 min | ~40 | On the freshest legs of the week. |
+| Wed | Upper strength, pull focus (plus explosive later) | 45 min | ~30 | Bryce runs his own VO2 run this day; do not stack heavy legs around it. |
+| Thu | Posterior chain and hamstring durability | 50 min | ~38 | The limiter day. Moderate, not maximal, to protect the weekend. |
+| Fri | Light power, accessory, carries | 40 min | ~22 | Keep legs fresh for the weekend. |
+| Sat | Low-fatigue durability (carries, isometrics, calf, trunk) | 35 min | ~15 | Before the long ride. Include "If Whoop is red the night before, swap this for 20 min mobility." |
+| Sun | No strength | n/a | n/a | Natasha's long run. |
 
-**Hinge redistribution rule (do not undo this).** The pre-2026-05-17 split had two lower days: Mon (Squat) and Sun (Hinge). Sunday's hinge session was the single most CNS-expensive session in the week, so cutting *that* day specifically maximises CNS relief per day removed. The hinge **pattern** must still be trained — but sub-maximally, never as a max-strength day:
+Only about two of the six lifts are truly hard (the Tuesday lower and one upper day); the rest are moderate or deliberately light. Do not make all six hard.
 
-- Mon: a moderate bilateral hinge accessory after the squat (e.g. RDL 3×8 at submax load), `coachNotes` flagged "replaces the old Sunday hinge day at lower CNS cost".
-- Fri: a hip-dominant hinge anchor at hypertrophy reps (e.g. Single-Leg RDL or RDL 3×10, submax), opening the Hypertrophy day.
+**Limiter bias (every week).** From the June 14 race, hamstrings edged toward cramping and run cadence and form collapsed after mile 6-7. Bias selection toward eccentric and fatigue-resistant hamstring work, calf and foot stiffness, hip and glute stability, and trunk endurance.
 
-Net effect: the posterior chain is trained twice weekly without a dedicated heavy hinge day. Weekly strength TSS lands ~154 (was ~194 on the 6-day split) — the ~20% reduction is the *point*, concentrated on the CNS axis. Do not "make up" the lost volume by adding sets elsewhere; that defeats the reason Sunday was cut.
+**No within-week movement repeats.** No movement may repeat anywhere in the Monday-to-Saturday week. Rotate within the workbook pattern pools; when a movement returns in a later week, it returns heavier, faster, or at a harder tempo.
 
-**When the user asks for "the week", build exactly these five sessions (Mon, Tue, Wed, Fri, Sat).** Never program Thursday or Sunday strength. Race-phase modulation still applies on top of this (5+ weeks out full 5-day program; 2-3 weeks out drop the Sat lift; race week / post-race no strength).
+**When the user asks for "the week", build exactly these six sessions (Mon through Sat).** Never program Sunday strength. The taper phase (workbook Wk 12-13) cuts volume on top of this; do not improvise other race-phase modulation that the workbook does not specify.
 
 ---
 
@@ -112,6 +100,28 @@ Net effect: the posterior chain is trained twice weekly without a dedicated heav
 1. For every prescribed Block, verify no exercise title contains "Bench Press", "Incline Bench", "Decline Bench", "Close Grip Bench", "Floor Press" with a barbell modality.
 2. If `tp_search_exercise` returns one of those banned ids, swap to the substitute in the table above.
 3. If the lifter manually requests a banned movement, refuse and propose the substitute. The constraint is medical, not preference.
+
+---
+
+## 2A. Front-rack constraint (HARD RULE, added 2026-06-22)
+
+**Reason:** the same elbow issue, plus wrist and shoulder loading, makes front-racked barbell positions a flare risk. This rule is medical, not preference, and overrides any movement table or library default.
+
+### Banned (do not prescribe under any circumstance)
+
+- Front Squat (TP id 143), front-rack lunge, Zercher squat or carry, any clean (power clean, hang clean, squat clean), and Olympic lifts generally (snatch, clean and jerk).
+- Any variation that racks a barbell across the front of the shoulders.
+
+### Substitutes (use any)
+
+- Squat pattern: Back Squat, Paused Back Squat, Hack Squat, Leg Press, Belt Squat, Goblet Squat (DB held at the chest), Bulgarian Split Squat.
+- Loaded carries or trunk work that would otherwise use a front rack: DB or kettlebell carries held at the sides or in a suitcase or farmer position, or a weighted plank.
+
+### Audit checklist before writing a session
+
+1. For every prescribed Block, verify no exercise title contains "Front Squat", "Front Rack", "Zercher", "Clean", or "Snatch".
+2. If a movement-pattern pool would return one of those, swap to a substitute above.
+3. If the lifter manually requests a banned movement, refuse and propose the substitute.
 
 ---
 
@@ -160,11 +170,11 @@ What counts as a "main movement":
 - Any movement listed in the BUILD-LOG.md "Common Bryce movements" table that is being used as the day's anchor.
 - Accessories paired into supersets do **not** require alternatives unless they are the only representative of a movement pattern that day.
 
-Default alternative ladder by pattern (pick 1-2):
+Default alternative ladder by pattern (pick 1-2). Every alternative must also respect the section 2 pressing ban and the section 2A front-rack ban:
 
 | Pattern | Default | Alt 1 | Alt 2 |
 |---|---|---|---|
-| Squat | Back Squat (131) | Front Squat (143) | Hack Squat / Leg Press |
+| Squat | Back Squat (131) | Hack Squat / Leg Press | Goblet Squat (DB) / Bulgarian Split Squat |
 | Hinge | Conventional Deadlift (141) | Trap Bar Deadlift (903) | Romanian Deadlift (154) |
 | Horizontal press | DB Bench Press (30) | Machine Chest Press | Cable Chest Press |
 | Incline press | Incline DB Press (611) | Incline Machine Press | Low-to-high Cable Press |
@@ -191,14 +201,16 @@ Audit run 2026-05-09 against the `claude/training-peaks-periodization-pressing-h
 
 **Swaps performed:** none required in active prescription files. The two banned movements only appear as references in the `BUILD-LOG.md` reference table; they have been marked `BANNED — see programming-spec.md §2` with substitute suggestions in place.
 
+Audit run 2026-06-22 (reconciliation to the six-day plan): updated section 1 (periodization now defers to the 13-week workbook), section 1A (six-day Mon-Sat split, Sunday off, Thursday a lift day), added section 2A (front-rack ban), and de-front-squatted the section 3 squat alternative ladder. Flagged Front Squat (143) BANNED in `BUILD-LOG.md`. Marked `scripts/program_week.py` SUPERSEDED (it builds the retired five-day split and listed a front-squat alternative); it now refuses to run by default. No active TrainingPeaks prescription required a swap (week 1 was written fresh under the new rules).
+
 ---
 
 ## 5. How a future session uses this file
 
-1. Read this file first when prompted to program or reprogram a strength week.
-2. Read `BUILD-LOG.md` for the exercise id reference, then §1A above for the canonical five-day split (Mon/Tue/Wed/Fri/Sat; Thu+Sun recovery).
+1. Read the plan authority first: the memory file `hybrid_lifting_program.md`, then the 13-week workbook. They define who the lifter is, the constraints, the current split, and the phase. Read this spec for the in-repo mechanics, not the plan.
+2. Read `BUILD-LOG.md` for the exercise id reference. Use section 1A above for the canonical six-day split (Mon through Sat; Sunday off; Thursday is a lift day).
 3. Read the prior week's workouts via `tp_get_workouts` and parse the `instructions` field for the `Progression:` line on each main lift.
-4. Decide the current mesocycle week (W1-W4) and the periodization model (linear / DUP / block) per Section 1.
-5. Build the new week's blocks. For every main movement, attach an `Alt:` line to `coachNotes` per Section 3.
-6. Run the Section 2 audit checklist before calling `tp_create_strength_workout`.
-7. Update the workout `instructions` with the explicit week-of-mesocycle and the chosen progression rule.
+4. Determine the current phase from the workbook by the upcoming Monday's date (see section 1). Carry progression forward per section 1.
+5. Build the new week's blocks. For every main movement, attach an `Alt:` line to `coachNotes` per section 3, respecting both bans. Do not repeat any movement within the week.
+6. Run the section 2 (elbow-safe) and section 2A (front-rack) audit checklists before calling `tp_create_strength_workout`.
+7. Update the workout `instructions` with the current phase and the chosen progression rule.
