@@ -1,8 +1,20 @@
 {
   "mcpServers": {
     "trainingpeaks": {
-      "command": "/Users/james/code/tpmcp/.venv/bin/tp-mcp",
+      "command": "./.venv/bin/tp-mcp",
       "args": ["serve"]
     }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/session-start.sh"
+          }
+        ]
+      }
+    ]
   }
 }

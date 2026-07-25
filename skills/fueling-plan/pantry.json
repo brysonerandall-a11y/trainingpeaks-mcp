@@ -1,0 +1,228 @@
+{
+  "last_updated": "2026-07-25",
+  "refresh_instructions": "See SKILL.md 'Refreshing the pantry'. Rebuilt from Gmail order confirmations, not from a live inventory feed.",
+  "sourced_from": [
+    "Gmail label Personal/Shopping/Bare Performance Nutrition (BPN order #2701709, 2026-07-14)",
+    "Gmail label Personal/Shopping/Bare Performance Nutrition (BPN order #2593121, 2026-04-29)",
+    "Gmail label Personal/Nutrition (Raw Nutrition order #306124, 2026-07-16)",
+    "Gmail label Personal/Shopping/Raw Nutrition (Raw Nutrition order #260910, 2026-04-28)"
+  ],
+  "known_gaps": [
+    "Quantities are units PURCHASED, not units remaining. Nothing tracks consumption.",
+    "Glucose:fructose ratio is unverified for every product here. This caps trustworthy intake at ~60 g/hr (see reference/fueling-math.md).",
+    "Go Bar sodium is not published. Maple Cinnamon macros assumed equal to Original Oat.",
+    "G.1.M Sport+ servings-per-tub not confirmed from the receipt."
+  ],
+
+  "during_exercise": [
+    {
+      "id": "bpn-g1m-sport-plus-orange",
+      "brand": "Bare Performance Nutrition",
+      "product": "G.1.M Sport+",
+      "flavor": "Orange",
+      "form": "drink_mix",
+      "serving": "1 scoop in 15-20 oz water",
+      "carbs_g": 20,
+      "sodium_mg": 350,
+      "caffeine_mg": 150,
+      "carb_source": "Cluster Dextrin (glucose polymer; no fructose listed)",
+      "units_purchased": 1,
+      "unit_note": "tub, serving count unconfirmed",
+      "purchased": "2026-04-29",
+      "order": "BPN #2593121",
+      "confidence": "medium",
+      "flags": [
+        "CAFFEINATED at 150 mg per scoop. This is the single biggest constraint in the pantry - two scoops is 300 mg before any gel.",
+        "Sport+ is the nootropic version (adds Alpha GPC, N-Acetyl-L-Tyrosine). Do not confuse with plain G.1.M Sport, which is caffeine-free.",
+        "Glucose-only carb source, so it cannot carry a >60 g/hr plan by itself."
+      ]
+    },
+    {
+      "id": "bpn-go-gel-mango",
+      "brand": "Bare Performance Nutrition",
+      "product": "Go Gel",
+      "flavor": "Mango",
+      "form": "gel",
+      "serving": "1 packet",
+      "carbs_g": 24,
+      "sodium_mg": 110,
+      "caffeine_mg": 0,
+      "calories": 100,
+      "carb_source": "unverified",
+      "units_purchased": 10,
+      "purchased": "2026-07-14",
+      "order": "BPN #2701709",
+      "confidence": "high"
+    },
+    {
+      "id": "bpn-go-gel-mixed-berry-caf",
+      "brand": "Bare Performance Nutrition",
+      "product": "Go Gel",
+      "flavor": "Mixed Berry CAF",
+      "form": "gel",
+      "serving": "1 packet",
+      "carbs_g": 24,
+      "sodium_mg": 110,
+      "caffeine_mg": 75,
+      "calories": 100,
+      "carb_source": "unverified",
+      "units_purchased": 10,
+      "purchased": "2026-07-14",
+      "order": "BPN #2701709",
+      "confidence": "high",
+      "flags": ["Caffeinated. Counts against the daily caffeine budget."]
+    },
+    {
+      "id": "bpn-go-gel-watermelon-caf",
+      "brand": "Bare Performance Nutrition",
+      "product": "Go Gel",
+      "flavor": "Watermelon CAF",
+      "form": "gel",
+      "serving": "1 packet",
+      "carbs_g": 24,
+      "sodium_mg": 110,
+      "caffeine_mg": 75,
+      "calories": 100,
+      "carb_source": "unverified",
+      "units_purchased": 10,
+      "purchased": "2026-07-14",
+      "order": "BPN #2701709",
+      "confidence": "high",
+      "flags": ["Caffeinated. Counts against the daily caffeine budget."]
+    },
+    {
+      "id": "bpn-go-gel-variety",
+      "brand": "Bare Performance Nutrition",
+      "product": "Go Gel",
+      "flavor": "Variety Pack",
+      "form": "gel",
+      "serving": "1 packet",
+      "carbs_g": 24,
+      "sodium_mg": 110,
+      "caffeine_mg": null,
+      "calories": 100,
+      "carb_source": "unverified",
+      "units_purchased": 30,
+      "unit_note": "2 x 15 ct",
+      "purchased": "2026-04-29",
+      "order": "BPN #2593121",
+      "confidence": "medium",
+      "flags": ["Variety pack - caffeine content varies by flavor in the box. Check each packet before counting it as caffeine-free."]
+    },
+    {
+      "id": "bpn-go-bar-maple-cinnamon",
+      "brand": "Bare Performance Nutrition",
+      "product": "Go Bar",
+      "flavor": "Maple Cinnamon",
+      "form": "solid",
+      "serving": "1 bar",
+      "carbs_g": 36,
+      "sodium_mg": null,
+      "caffeine_mg": 0,
+      "calories": 200,
+      "carb_source": "oat-based",
+      "units_purchased": 12,
+      "purchased": "2026-07-14",
+      "order": "BPN #2701709",
+      "confidence": "medium",
+      "flags": ["Macros taken from Original Oat; Maple Cinnamon may differ slightly.", "Solid food - bike only, not mid-run."]
+    },
+    {
+      "id": "bpn-go-bar-original-oat",
+      "brand": "Bare Performance Nutrition",
+      "product": "Go Bar",
+      "flavor": "Original Oat",
+      "form": "solid",
+      "serving": "1 bar",
+      "carbs_g": 36,
+      "sodium_mg": null,
+      "caffeine_mg": 0,
+      "calories": 200,
+      "carb_source": "oat-based",
+      "units_purchased": 12,
+      "purchased": "2026-04-29",
+      "order": "BPN #2593121",
+      "confidence": "high",
+      "flags": ["Solid food - bike only, not mid-run."]
+    }
+  ],
+
+  "hydration_only": [
+    {
+      "id": "raw-replenish-chocolate",
+      "brand": "Raw Nutrition",
+      "product": "Raw Replenish",
+      "flavor": "Chocolate",
+      "form": "drink_mix",
+      "serving": "1 scoop",
+      "carbs_g": 0,
+      "sodium_mg": 1000,
+      "caffeine_mg": 0,
+      "units_purchased": 1,
+      "unit_note": "60 serving tub",
+      "purchased": "2026-07-16",
+      "order": "Raw #306124",
+      "confidence": "medium",
+      "flags": [
+        "ELECTROLYTE FORMULA, NOT A CARB FUEL. Roughly 1000 mg sodium per serving and no meaningful carbohydrate.",
+        "This is the product most likely to be mistaken for a carb drink mix. It hydrates; it does not fuel."
+      ]
+    },
+    {
+      "id": "raw-replenish-watermelon-mojito",
+      "brand": "Raw Nutrition",
+      "product": "Raw Replenish",
+      "flavor": "Watermelon Mojito",
+      "form": "drink_mix",
+      "serving": "1 scoop",
+      "carbs_g": 0,
+      "sodium_mg": 1000,
+      "caffeine_mg": 0,
+      "units_purchased": 1,
+      "unit_note": "60 serving tub",
+      "purchased": "2026-04-28",
+      "order": "Raw #260910",
+      "confidence": "medium",
+      "flags": ["Electrolyte formula, not a carb fuel."]
+    }
+  ],
+
+  "adjacent": [
+    {
+      "id": "raw-liquid-glycerol",
+      "brand": "Raw Nutrition",
+      "product": "Liquid Glycerol",
+      "flavor": "Strawberry Slush",
+      "purpose": "pre-exercise hyperhydration",
+      "purchased": "2026-07-16",
+      "order": "Raw #306124",
+      "flags": ["Hot-day / long-session pre-load only. Not an in-session fuel. Practice before racing with it."]
+    },
+    {
+      "id": "raw-bum-energy-pouches",
+      "brand": "Raw Nutrition",
+      "product": "BUM Energy Pouches",
+      "flavor": "Peppermint",
+      "purpose": "caffeine",
+      "caffeine_mg": null,
+      "units_purchased": 5,
+      "unit_note": "5 pack",
+      "purchased": "2026-07-16",
+      "order": "Raw #306124",
+      "confidence": "low",
+      "flags": ["Caffeine dose per pouch unverified - check the tin before counting it against the budget."]
+    }
+  ],
+
+  "not_for_fueling": [
+    { "product": "Whey Protein", "flavor": "Blueberry Muffin", "brand": "Bare Performance Nutrition", "purpose": "post-session recovery" },
+    { "product": "Peak Sleep", "flavor": "Berry", "brand": "Bare Performance Nutrition", "purpose": "sleep" },
+    { "product": "PUMP", "flavor": "Midnight Melon", "brand": "Bare Performance Nutrition", "purpose": "pre-workout" },
+    { "product": "Thuper Pump", "flavor": "Sour Watermelon", "brand": "Raw Nutrition", "purpose": "pre-workout" },
+    { "product": "Essential Charged Pre-Workout", "flavor": "Blue Rathberry", "brand": "Raw Nutrition", "purpose": "pre-workout" },
+    { "product": "Creatine Monohydrate", "brand": "Raw Nutrition", "purpose": "daily supplement" },
+    { "product": "EAA Plus", "flavor": "Sour Gummy Worm", "brand": "Raw Nutrition", "purpose": "amino acids" },
+    { "product": "Protein Bars", "flavor": "Peanut Butter Fudge / Salted Caramel Pretzel / Double Fudge Brownie", "brand": "Raw Nutrition", "purpose": "recovery snack - too much protein and fat for mid-session fuel" },
+    { "product": "Strong Reds / Strong Greens", "brand": "Bare Performance Nutrition", "purpose": "daily greens" }
+  ]
+}

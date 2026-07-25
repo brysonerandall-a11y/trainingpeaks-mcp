@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "trainingpeaks": {
+      "command": "./.venv/bin/tp-mcp",
+      "args": ["serve"]
+    }
+  }
+}
