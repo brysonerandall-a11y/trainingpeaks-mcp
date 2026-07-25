@@ -15,24 +15,55 @@ bar at the ninety-minute mark.* This skill closes the gap between "60 g/hr" and
 The deliverable is a **count of physical objects**, not a rate. A plan that ends
 at "aim for 60-80 g/hr" has failed.
 
-## Requirements
+## Where the session data comes from
 
-Needs the TrainingPeaks MCP connected — `tp_get_workouts`, `tp_get_athlete_settings`.
-Run from local Claude Code in the `trainingpeaks-mcp` repo (the `.mcp.json` there
-registers the server), or from Claude Desktop.
+Three sources, in order. **Never stop at the first one being unavailable** —
+the second works in any session with Bryce's Google account, including cloud
+sessions where the MCP cannot run.
 
-If the `tp_*` tools are not available, say so plainly and stop. Do not invent a
-training session, and do not fall back on "a typical long ride." Ask Bryce for
-the sport and planned duration and run the math on that instead — that path is
-fine, it just has to be labelled as his input rather than TrainingPeaks data.
+### 1. TrainingPeaks MCP (best)
+
+`tp_get_workouts` and `tp_get_athlete_settings`. Gives planned duration, TSS,
+IF, and body mass. Available from local Claude Code in the `trainingpeaks-mcp`
+repo, or Claude Desktop.
+
+### 2. TrainingPeaks iCal feed in Google Calendar (works almost anywhere)
+
+Bryce's TrainingPeaks calendar is subscribed to his Google Calendar as
+`jn1icru68l14ijcurr87i1uq245bqe2u@import.calendar.google.com`. Query it with
+`list_events` for the target date.
+
+Each event's `description` carries the **full structured workout** — warm-up,
+main set, intervals with target percentages, and `Planned Time:`. The `summary`
+is the workout title. This is genuinely enough to build a fueling plan.
+
+What it does *not* carry: TSS, IF, or body mass. Infer intensity from the
+interval targets in the description rather than guessing a number, and fall
+back to the 400 mg caffeine ceiling instead of 6 mg/kg.
+
+### 3. The TrainingPeaks daily schedule email
+
+`from:messages-no-reply@trainingpeaks.com`, subject `Schedule for <date>`,
+delivered around 05:15 UTC daily. Covers the same sessions plus strength work,
+with coach notes. Often lands in TRASH, so search `in:anywhere`. Some of these
+threads return "caller does not have permission" on fetch — if so, the search
+snippet still carries the session titles and durations, and the calendar is the
+better source anyway.
+
+### If all three fail
+
+Say so plainly and ask Bryce for sport and planned duration. Run the same math
+on his numbers, labelled as his input rather than TrainingPeaks data. Never
+invent a session, and never fall back on "a typical long ride."
 
 ## Workflow
 
 ### 1. Get the sessions
 
-`tp_get_workouts` for the target date (default today). For each session capture
-sport type, planned duration, planned TSS, and IF. Also pull
-`tp_get_athlete_settings` once for body mass — it sets the caffeine budget.
+Pull the target date (default today) from the best available source above. For
+each session capture sport type, planned duration, and whatever intensity
+information exists. Get body mass from `tp_get_athlete_settings` when the MCP
+is available.
 
 Skip anything already completed unless Bryce asks about it. Strength and
 mobility sessions do not get a fueling plan; mention them in one clause and
