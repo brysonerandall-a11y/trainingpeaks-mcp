@@ -4,5 +4,17 @@
       "command": "./.venv/bin/tp-mcp",
       "args": ["serve"]
     }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/session-start.sh"
+          }
+        ]
+      }
+    ]
   }
 }
