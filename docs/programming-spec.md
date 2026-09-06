@@ -5,11 +5,11 @@ In-repo technical companion for the hybrid-lift programming skill. This is the d
 This file is NOT the plan authority. The plan is owned off-repo, in this order:
 
 1. `~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md` (who the lifter is, the constraints, the current split).
-2. `~/Documents/AI & Projects/projects/hybrid-strength-plan/Hybrid-Strength-Plan_2026-06-22_to_2026-09-20.xlsx` (the 13-week block macrocycle: phases, weekly template, exercise rotation pools, VO2 ramp, taper).
+2. `~/Documents/AI & Projects/projects/fitness/hybrid-strength-plan/Hybrid-Strength-Plan_2026-06-22_to_2026-09-20.xlsx` (the 13-week block macrocycle: phases, weekly template, exercise rotation pools, VO2 ramp, taper).
 
 On any conflict about the PLAN (the split, the phase, exercise selection), the memory file and the workbook win. This spec governs only the in-repo HOW-to-write mechanics. Where this spec once described the plan itself (the periodization model in section 1 and the weekly split in section 1A), it now defers to those two sources and records only what is still mechanically true.
 
-Last updated: 2026-06-22 (reconciled to the six-day plan and the 13-week macrocycle; added the front-rack ban, section 2A).
+Last updated: 2026-06-23 (corrected the equipment baseline to Bryce's apartment/building gym and added the equipment and comfort ban, section 2B; removed leg press, hack squat, Smith, belt squat, and trap bar from all substitute ladders). Prior: 2026-06-22 (reconciled to the six-day plan and the 13-week macrocycle; added the front-rack ban, section 2A).
 
 ---
 
@@ -125,7 +125,7 @@ Only about two of the six lifts are truly hard (the Tuesday lower and one upper 
 
 ### Substitutes (use any)
 
-- Squat pattern: Back Squat, Paused Back Squat, Hack Squat, Leg Press, Belt Squat, Goblet Squat (DB held at the chest), Bulgarian Split Squat.
+- Squat pattern: Back Squat, Paused Back Squat, Goblet Squat (DB held at the chest), Bulgarian Split Squat, Leg Extension (machine), Step-up.
 - Loaded carries or trunk work that would otherwise use a front rack: DB or kettlebell carries held at the sides or in a suitcase or farmer position, or a weighted plank.
 
 ### Audit checklist before writing a session
@@ -136,18 +136,42 @@ Only about two of the six lifts are truly hard (the Tuesday lower and one upper 
 
 ---
 
+## 2B. Equipment and comfort constraint (HARD RULE, added 2026-06-23)
+
+**Reason:** Bryce trains at his apartment/building gym in River North, not a fully equipped commercial gym. The earlier "Trump Tower, any equipment is fair game" baseline was wrong and caused leg press to be programmed. Two classes of movement are now banned: those his gym cannot do, and those he has ruled out by preference.
+
+### Banned — not in his gym (never prescribe)
+
+Leg Press, Single-Leg Press, Hack Squat (machine), Smith machine (any pattern), Belt Squat, Trap/Hex-bar Deadlift, GHD. Substitute from the squat and hinge ladders in section 3, which now list only available movements.
+
+### Banned — preference (never prescribe)
+
+Overhead Squat, kipping pull-ups and any CrossFit-style kipping gymnastics, and Olympic lifts or cleans (snatch, clean and jerk, power clean, hang clean). The Olympic lifts are also already banned medically by section 2A.
+
+### Available equipment (program only from here)
+
+Squat rack, barbell, dumbbells and free weights, cables (functional trainer), dip station, pull-up bar, machine chest/shoulder press, machine row, seated and lying leg curl, leg extension, hip abductor/adductor, resistance bands, bench. Because he has a squat rack and barbell, the back squat is his primary squat and barbell RDL/deadlift cover the hinge; the leg curl machine is a primary hamstring tool.
+
+### Audit checklist before writing a session
+
+1. For every prescribed Block, verify no exercise title contains "Leg Press", "Hack Squat", "Smith", "Belt Squat", "Trap Bar", "Hex Bar", "Overhead Squat", "Kipping", "Clean", or "Snatch".
+2. If a movement-pattern pool would return one of those, swap to a section-3 substitute that uses available equipment.
+3. If the lifter manually requests one, refuse and propose the substitute (gym-availability or stated preference).
+
+---
+
 ## 3. Equipment & alternatives
 
-### Default training site: Trump Tower Chicago Fitness Club
+### Default training site: Bryce's apartment/building gym (River North)
 
-Confirmed published equipment (commercial gym, ~23,000 sq ft, 24/7):
+Confirmed equipment (apartment/building gym, confirmed by Bryce 2026-06-23). This REPLACES the earlier "Trump Tower Chicago Fitness Club, any equipment is fair game" baseline, which was wrong and caused leg press to be programmed.
 
-- **Free-weight room**: squat rack, smith machine, bench (note: bench available, but NOT used for barbell pressing per Section 2), multifunction workout station.
-- **Cardio**: Technogym + Life Fitness treadmills, ellipticals, recumbent bikes, upright bikes, stair climbers, rowers; Peloton bikes.
-- **Resistance machines**: Technogym + Life Fitness selectorized stations for major muscle groups.
-- **Pilates**: Gratz reformer/Cadillac (not used in this program but available).
+**Available — program only from this list:**
 
-**Not explicitly published** (assume present per "well-equipped commercial gym"): full dumbbell rack to ~100 lb, cable crossover / dual-stack cable column, leg press, hack squat, lat pulldown, seated row, hip-thrust pad/bench, GHD or hyperextension, plate-loaded chest-supported row.
+- **Lower body**: squat rack, barbell, dumbbells and free weights, seated/lying leg curl, leg extension, hip abductor, hip adductor, resistance bands, bench.
+- **Upper body**: dumbbells, cables (functional trainer), dip station, pull-up bar, machine chest/shoulder press, machine row.
+
+**NOT available — never program (substitute from the ladders below):** leg press, single-leg press, hack squat, Smith machine, belt squat, trap/hex bar, GHD. Because he has a squat rack and barbell, the back squat is his primary squat and barbell RDL/deadlift cover the hinge; the leg curl machine is his primary hamstring machine.
 
 If the lifter reports a missing piece, fall back to the per-movement alternatives below.
 
@@ -168,7 +192,7 @@ Example:
     "exercises": [
         {
             "name": "Back Squat",
-            "coachNotes": "Rest 2:00. Alt: Hack Squat; Goblet Squat (DB) high-bar tempo.",
+            "coachNotes": "Rest 2:00. Alt: Goblet Squat (DB) high-bar tempo; Bulgarian Split Squat.",
             "sets": [{"reps": 6}, {"reps": 6}, {"reps": 6}, {"reps": 6}],
         },
     ],
@@ -185,8 +209,8 @@ Default alternative ladder by pattern (pick 1-2). Every alternative must also re
 
 | Pattern | Default | Alt 1 | Alt 2 |
 |---|---|---|---|
-| Squat | Back Squat (131) | Hack Squat / Leg Press | Goblet Squat (DB) / Bulgarian Split Squat |
-| Hinge | Conventional Deadlift (141) | Trap Bar Deadlift (903) | Romanian Deadlift (154) |
+| Squat | Back Squat (131) | Goblet Squat (DB) | Bulgarian Split Squat / Leg Extension |
+| Hinge | Conventional Deadlift (141) | Romanian Deadlift (154) | DB Romanian Deadlift / Seated Leg Curl |
 | Horizontal press | DB Bench Press (30) | Machine Chest Press | Cable Chest Press |
 | Incline press | Incline DB Press (611) | Incline Machine Press | Low-to-high Cable Press |
 | Vertical press | Barbell Overhead Press (11) | Seated DB Press (771) | Machine Shoulder Press |
@@ -213,6 +237,8 @@ Audit run 2026-05-09 against the `claude/training-peaks-periodization-pressing-h
 **Swaps performed:** none required in active prescription files. The two banned movements only appear as references in the `BUILD-LOG.md` reference table; they have been marked `BANNED — see programming-spec.md §2` with substitute suggestions in place.
 
 Audit run 2026-06-22 (reconciliation to the six-day plan): updated section 1 (periodization now defers to the 13-week workbook), section 1A (six-day Mon-Sat split, Sunday off, Thursday a lift day), added section 2A (front-rack ban), and de-front-squatted the section 3 squat alternative ladder. Flagged Front Squat (143) BANNED in `BUILD-LOG.md`. Marked `scripts/program_week.py` SUPERSEDED (it builds the retired five-day split and listed a front-squat alternative); it now refuses to run by default. No active TrainingPeaks prescription required a swap (week 1 was written fresh under the new rules).
+
+Audit run 2026-06-23 (equipment correction): Bryce confirmed his real training site is his apartment/building gym in River North, not a commercial gym, with no leg press, hack squat, Smith machine, belt squat, or trap/hex bar. Corrected the section 3 equipment baseline, removed those movements from the section 2A and section 3 substitute ladders, removed leg press/hack squat/single-leg press/trap bar from the workbook pools (Weekly Template, Exercise Library, Metrics & Autoregulation, plus the Overview hard-constraints cell), added section 2B (equipment and comfort ban: also no overhead squat, kipping pull-ups, or Olympic lifts), and changed the memory-file example payload from Leg Press to Back Squat. The 2026-06-23 Tuesday lower session in TrainingPeaks had programmed leg press; Bryce did back squats instead in real time.
 
 ---
 

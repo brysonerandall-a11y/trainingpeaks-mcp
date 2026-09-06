@@ -15,7 +15,7 @@ two scheduled routines that call the MCP tools directly:
     ~/.claude/scheduled-tasks/hybrid-lift-reprogrammer/SKILL.md (manual)
 
 Sources of truth for the current plan:
-    ~/Documents/AI & Projects/projects/hybrid-strength-plan/Hybrid-Strength-Plan_2026-06-22_to_2026-09-20.xlsx
+    ~/Documents/AI & Projects/projects/fitness/hybrid-strength-plan/Hybrid-Strength-Plan_2026-06-22_to_2026-09-20.xlsx
     ~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md
 
 This file is kept only as historical reference. It refuses to run by default. To

@@ -101,12 +101,12 @@ Confirmed via `tp_search_exercise` during build. Use these to cross-check on fut
 | Movement | TP id | Notes |
 |---|---|---|
 | Back Squat | 131 | Quad-dominant primary |
-| Front Squat | 143 | **BANNED** (front-rack movement) as of 2026-06-22; see programming-spec.md §2A. Substitute: Hack Squat, Leg Press, Goblet Squat (DB), or Bulgarian Split Squat. |
+| Front Squat | 143 | **BANNED** (front-rack movement) as of 2026-06-22; see programming-spec.md §2A. Substitute: Back Squat (131), Goblet Squat (DB), or Bulgarian Split Squat. |
 | Paused Back Squat | 5356 | Variation |
 | Deadlift | 141 | "Conventional Deadlift" maps here |
 | Romanian Deadlift | 154 | |
 | Single Leg Romanian Deadlift | 156 | Search "Single-Leg RDL" hits this too |
-| TrapBar Deadlift | 903 | |
+| TrapBar Deadlift | 903 | **NOT AVAILABLE** (no trap/hex bar in his gym) as of 2026-06-23; see programming-spec.md §2B. Substitute: Romanian Deadlift (154) or Conventional Deadlift (141). |
 | DB Walking Lunge | 47 | Beware: bare "Walking Lunge" returns id 924 (overhead) |
 | Bench Press | 16 | **BANNED** (barbell flat bench) — see `docs/programming-spec.md` §2. Substitute: DB Bench Press (30) or machine/cable chest press. |
 | DB Bench Press | 30 | Use this for "Flat DB Press" intent. Default substitute for Bench Press (16). |
@@ -135,14 +135,14 @@ Confirmed via `tp_search_exercise` during build. Use these to cross-check on fut
 | Rocking Standing Calf Raise | 750 | "Standing Calf Raise" maps here |
 | Swiss Ball Leg Curl | 897 | "Lying Leg Curl" not in library; this is the closest |
 
-Movements NOT in the library (substitute with above): Pallof Press, Lying Leg Curl (literal), Donkey Calf Raise, Pec Deck.
+Movements NOT in the library (substitute with above): Lying Leg Curl (literal; log machine leg curls under Swiss Ball Leg Curl, 897), Donkey Calf Raise, Pec Deck. CORRECTION 2026-07-02: Pallof Press IS in the library, spelled "Paloff Press", id 705. Also confirmed: Box Jump 21, Broad Jump 23, Cable Seated Row 766, Reverse Fly with Pronated Grip 742, Close Grip DB Press 483, Barbell Ab Rollout 426, Single Leg Heels Elevated Hip Thrust 827, Mini Band Lateral Walk 692, DB Farmer's Walk 33, Single Leg Calf Raise 26, Leg Extension 422796 (custom).
 
 ## Programming spec snapshot
 
 The current plan is owned by two off-repo sources of truth, in this order:
 
 1. `~/.claude/projects/-Users-randall-Documents-AI---Projects-projects/memory/hybrid_lifting_program.md` (the lifter profile and constraints).
-2. `~/Documents/AI & Projects/projects/hybrid-strength-plan/Hybrid-Strength-Plan_2026-06-22_to_2026-09-20.xlsx` (the 13-week block macrocycle: phases, weekly template, exercise rotation pools, VO2 ramp, taper).
+2. `~/Documents/AI & Projects/projects/fitness/hybrid-strength-plan/Hybrid-Strength-Plan_2026-06-22_to_2026-09-20.xlsx` (the 13-week block macrocycle: phases, weekly template, exercise rotation pools, VO2 ramp, taper).
 
 The in-repo `docs/programming-spec.md` is the technical companion: MCP payload mechanics, the elbow-safe and front-rack bans, the equipment baseline, the alternatives convention, and the exercise-id discipline. It was reconciled to this plan on 2026-06-22. On any conflict about the PLAN (the split, the phases, exercise selection), the memory file and the workbook win; the spec governs only the in-repo HOW-to-write mechanics.
 
@@ -153,10 +153,11 @@ Headlines (current as of 2026-06-22):
 - Only about two of the six lifts are truly hard (Tuesday lower and one upper day); the rest are moderate or deliberately light.
 - Periodization is the workbook's fixed 13-week block plan, NOT a generic 4-week DUP mesocycle. Phases: Wk1 Calibration, Wk2-4 Strength + lean mass, Wk5-8 Maximal strength + power, Wk9-11 Conversion to race durability, Wk12-13 Taper. A-race IRONMAN 70.3 Michigan 2026-09-20. After that date the plan must be rebuilt; do not improvise past it.
 - Pressing constraint (programming-spec.md §2, HARD RULE): barbell pressing is overhead only; all horizontal and incline pressing is DB, machine, or cable (elbow tendinosis). Banned ids include Bench Press (16) and Close Grip Incline Bench Press (486).
-- Front-rack constraint (programming-spec.md §2A, HARD RULE, new 2026-06-22): no front squat, front-rack lunge, Zercher, cleans, or hang cleans. Substitute back-squat variants, goblet squat (DB at chest), Bulgarian split squat, hack squat, or leg press. Avoid Olympic lifts.
+- Front-rack constraint (programming-spec.md §2A, HARD RULE, new 2026-06-22): no front squat, front-rack lunge, Zercher, cleans, or hang cleans. Substitute back-squat variants, goblet squat (DB at chest), Bulgarian split squat, leg extension, or step-up. Avoid Olympic lifts.
+- Equipment and comfort constraint (programming-spec.md §2B, HARD RULE, new 2026-06-23): Bryce trains at his apartment/building gym, NOT a commercial gym. Never program leg press, single-leg press, hack squat, Smith machine, belt squat, or trap/hex bar (not in his gym), and never program overhead squat, kipping pull-ups, or Olympic lifts/cleans (preference).
 - No movement repeats anywhere in the Monday-to-Saturday week; rotate within the workbook pattern pools, and when a movement returns in a later week it returns heavier, faster, or at a harder tempo.
 - Limiter bias (June 14 race: late hamstring near-cramp and run-cadence collapse): every week, bias eccentric and fatigue-resistant hamstrings, calf and foot stiffness, hip and glute stability, and trunk endurance.
-- Equipment and alternatives (programming-spec.md §3): default site Trump Tower Chicago (assume a well-equipped commercial gym); every main movement carries 1-2 alternatives in `coachNotes`, where rest times go, and those alternatives must also respect both bans.
+- Equipment and alternatives (programming-spec.md §3 and §2B): default site is Bryce's apartment/building gym in River North (NOT a commercial gym; corrected 2026-06-23). Program only gear he confirmed; never program leg press, hack squat, Smith, belt squat, or trap bar. Every main movement carries 1-2 alternatives in `coachNotes`, where rest times go, and those alternatives must respect all bans.
 - Per-day duration / TSS: Mon 45/30, Tue 50/40, Wed 45/30, Thu 50/38, Fri 40/22, Sat 35/15. Weight columns always blank; Bryce logs loads on his phone.
 - VO2 is Bryce's own (running first from Wk2 on Wednesdays, cycling around Wk5); the strength layer never programs endurance and never edits a Natasha workout.
 
@@ -267,7 +268,15 @@ Ran from Claude Code on the web (a cloud sandbox, not the Mac). Verified next we
 
 ### Session 9 (2026-06-22, Sunday)
 
-The Sunday `hybrid-lift-programmer` run found a full week of stale, non-compliant strength sessions already on the calendar (a six-day-with-Sunday layout, front squat, barbell bench), written earlier that day by an unidentified generator running pre-2026-05-17 logic. Bryce deleted them and redirected the work: researched and built a complete evidence-led 13-week strength macrocycle from 2026-06-22 to the 2026-09-20 A-race (IRONMAN 70.3 Michigan), shipped as an 8-tab workbook at `~/Documents/AI & Projects/projects/hybrid-strength-plan/Hybrid-Strength-Plan_2026-06-22_to_2026-09-20.xlsx` (with `build_plan.py` to regenerate it), and loaded week 1 (six sessions Mon-Sat) into TrainingPeaks. The plan returns to a SIX-day split (Mon-Sat, Sunday off, Thursday now a lift day) and adds a hard front-rack ban (no front squat, front-rack lunge, Zercher, cleans) on top of the existing barbell-bench ban. Both routines and the off-repo memory file were rewritten to the new rules. On 2026-06-22 the in-repo programming surface was reconciled to match: this BUILD-LOG snapshot and the Front Squat reference row were updated, `docs/programming-spec.md` was reconciled (six-day split in §1A, new §2A front-rack ban, the §3 squat-alternative ladder de-front-squatted, periodization in §1 deferred to the workbook), and `scripts/program_week.py` was marked SUPERSEDED and set to refuse to run by default. The workbook and the memory file are the plan authority; the spec is the in-repo technical companion.
+The Sunday `hybrid-lift-programmer` run found a full week of stale, non-compliant strength sessions already on the calendar (a six-day-with-Sunday layout, front squat, barbell bench), written earlier that day by an unidentified generator running pre-2026-05-17 logic. Bryce deleted them and redirected the work: researched and built a complete evidence-led 13-week strength macrocycle from 2026-06-22 to the 2026-09-20 A-race (IRONMAN 70.3 Michigan), shipped as an 8-tab workbook at `~/Documents/AI & Projects/projects/fitness/hybrid-strength-plan/Hybrid-Strength-Plan_2026-06-22_to_2026-09-20.xlsx` (with `build_plan.py` to regenerate it), and loaded week 1 (six sessions Mon-Sat) into TrainingPeaks. The plan returns to a SIX-day split (Mon-Sat, Sunday off, Thursday now a lift day) and adds a hard front-rack ban (no front squat, front-rack lunge, Zercher, cleans) on top of the existing barbell-bench ban. Both routines and the off-repo memory file were rewritten to the new rules. On 2026-06-22 the in-repo programming surface was reconciled to match: this BUILD-LOG snapshot and the Front Squat reference row were updated, `docs/programming-spec.md` was reconciled (six-day split in §1A, new §2A front-rack ban, the §3 squat-alternative ladder de-front-squatted, periodization in §1 deferred to the workbook), and `scripts/program_week.py` was marked SUPERSEDED and set to refuse to run by default. The workbook and the memory file are the plan authority; the spec is the in-repo technical companion.
+
+### Session 10 (2026-07-02, Thursday)
+
+Root-caused the SECOND stale-week incident. Six exact copies of the Week-1 Calibration sessions (ids 21641135-21641160, including the banned Leg Press day) sat on Jun 29-Jul 4 and made the 6/28 Sunday programmer run refuse. Forensics: created in one batch Sat 2026-06-27 13:02:27 UTC (8:02 AM Central); the copies reproduce Week-1 prescription anomalies byte-for-byte (blank prescribed reps on the Bulgarian split squat), reuse the same custom exercise records, and appear in NO agent transcript, scheduled task, launchd/cron/at job, or Claude desktop tree; TrainingPeaks connected apps hold only Garmin, MyFitnessPal, Technogym, Whoop, and Zwift. Conclusion: a TrainingPeaks-NATIVE copy made from Bryce's own account (phone or web), not an agent. Secondary root cause of the silence: the programmer's [ACTION REQUIRED] flag was created as a Gmail DRAFT with the Auto-Send label, which nothing sends, so it sat unseen for four days.
+
+Remediation this session: kept the two COMPLETED copies as logged history (the 6/30 "Leg Press" 185x8 log is Bryce's barbell leg anchor, est. 1RM ~234); deleted the four uncompleted copies (21641148, 21641153, 21641156, 21641160); wrote the Week-2 Accumulation prescription onto Jul 6-11 (ids 21924000, 21924003, 21924005, 21924014, 21924015, 21924018 — the accumulation phase compresses by one week; phase boundaries and the Sep 20 race calendar are unchanged); hardened both routine SKILL.md files (earlier-phase-title refusal, all [ACTION REQUIRED] flags sent directly via gmail_send_message instead of drafted, loud Whoop-overlay-off subject suffix and banner, delayed-fire date recompute, and the reprogrammer must never delete a session with completed sets).
+
+EVENING ADDENDUM (same day): the Jun 27 batch was TWELVE copies, not six. A second set of six (ids 21641139, 21641143, 21641152, 21641154, 21641157, 21641165 — interleaved in the same contiguous ID block) surfaced on Jul 6-11 at 22:03:40 UTC (5:03 PM Central) via another TP-native calendar action; they had been parked outside the queried window (list calls covering through Jul 12 at 21:05 and 21:40 UTC did not return them). No agent TP calls occurred in that window, and new creations would mint 219xxxxx ids. All six deleted; Jul 13-Aug 9 verified clean. New standing defense: `tp-calendar-guard` scheduled task (daily 5:10 AM) auto-deletes uncompleted stale copies (earlier-phase titles, duplicate days, Sunday lifts, completed-week clones) in the next 21 days, strength tools only, never touches completed sessions or endurance, emails only when it acts. Both lift routines switched to DIRECT SEND for all email (summary included); the draft + Auto-Send Label_99 pipeline is retired as dead.
 
 ## Known issues and gotchas
 
